@@ -11,20 +11,20 @@ import type { Expense } from './types'
 type AppView = 'home' | 'stats' | 'settings'
 
 const viewOrder: AppView[] = ['home', 'stats', 'settings']
-const viewPanels: AppView[] = ['settings', 'home', 'stats', 'settings', 'home']
-const displayIndex = ref(1)
+const viewPanels: AppView[] = viewOrder
+const displayIndex = ref(0)
 const isAnimating = ref(true)
 const touchStart = ref<{ x: number; y: number } | null>(null)
 const editingExpense = ref<Expense | null>(null)
 const expenseStore = useExpenseStore()
 
 const activeView = computed<AppView>({
-  get: () => viewOrder[(displayIndex.value - 1 + viewOrder.length) % viewOrder.length],
+  get: () => viewOrder[displayIndex.value],
   set: (view) => goToView(view)
 })
 
 const trackStyle = computed(() => ({
-  transform: `translate3d(-${displayIndex.value * 20}%, 0, 0)`,
+  transform: `translate3d(-${displayIndex.value * 33.333333}%, 0, 0)`,
   transition: isAnimating.value ? 'transform .36s cubic-bezier(.22, .75, .25, 1)' : 'none'
 }))
 
@@ -39,7 +39,7 @@ function resetScrollPosition(): void {
 }
 
 function goToView(view: AppView): void {
-  const targetIndex = viewOrder.indexOf(view) + 1
+  const targetIndex = viewOrder.indexOf(view)
   if (targetIndex === displayIndex.value) return
   resetScrollPosition()
   isAnimating.value = true
@@ -49,19 +49,7 @@ function goToView(view: AppView): void {
 function moveView(direction: 1 | -1): void {
   resetScrollPosition()
   isAnimating.value = true
-  displayIndex.value += direction
-}
-
-function handleTrackTransitionEnd(event: TransitionEvent): void {
-  if (event.propertyName !== 'transform') return
-  if (displayIndex.value === 0 || displayIndex.value === viewPanels.length - 1) {
-    const targetIndex = displayIndex.value === 0 ? viewPanels.length - 2 : 1
-    isAnimating.value = false
-    displayIndex.value = targetIndex
-    window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(() => { isAnimating.value = true })
-    })
-  }
+  displayIndex.value = Math.max(0, Math.min(viewOrder.length - 1, displayIndex.value + direction))
 }
 
 function handleTouchStart(event: TouchEvent): void {
@@ -97,7 +85,7 @@ onBeforeUnmount(() => { touchStart.value = null })
         @touchstart.passive="handleTouchStart"
         @touchend="handleTouchEnd"
       >
-        <div class="view-track" :style="trackStyle" @transitionend="handleTrackTransitionEnd">
+        <div class="view-track" :style="trackStyle">
           <section v-for="(view, index) in viewPanels" :key="`${view}-${index}`" class="view-panel">
             <HomeView v-if="view === 'home'" @edit="openEditor" />
             <StatsView v-else-if="view === 'stats'" @edit="openEditor" />
