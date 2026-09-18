@@ -57,12 +57,13 @@ onBeforeUnmount(() => {
     </div>
 
     <section class="day-summary">
-      <p class="day-summary-label">{{ isToday(selectedDate) ? '今天' : '这一天' }}共支出</p>
-      <p class="day-summary-total">{{ formatMoney(dayTotal, true) }}</p>
+      <div class="day-summary-main">
+        <p class="day-summary-label">{{ isToday(selectedDate) ? '今天' : '这一天' }}共支出</p>
+        <p class="day-summary-total">{{ formatMoney(dayTotal, true) }}</p>
+      </div>
       <p class="day-summary-split">
-        日常 <strong>{{ formatMoney(regularTotal) }}</strong>
-        <span>·</span>
-        一次性 <strong class="one-off-text">{{ formatMoney(oneOffTotal) }}</strong>
+        <span>日常 <strong>{{ formatMoney(regularTotal) }}</strong></span>
+        <span>一次性 <strong class="one-off-text">{{ formatMoney(oneOffTotal) }}</strong></span>
       </p>
     </section>
 
@@ -92,10 +93,11 @@ onBeforeUnmount(() => {
 .date-picker-label { position: relative; display: inline-flex; align-items: center; gap: 0; cursor: pointer; }
 .date-picker-label::after { content: '⌄'; margin-left: 6px; color: var(--faint); font-size: 15px; }
 .date-picker-input { position: absolute; inset: 0; width: 100%; cursor: pointer; opacity: 0; }
-.day-summary { padding: 7px 2px 21px; }
+.day-summary { display: flex; align-items: end; justify-content: space-between; gap: 16px; padding: 7px 2px 21px; }
+.day-summary-main { min-width: 0; }
 .day-summary-label { margin: 0 0 3px; color: var(--muted); font-size: 12px; font-weight: 700; }
 .day-summary-total { margin: 0; color: var(--ink); font-size: 34px; font-weight: 850; letter-spacing: -.07em; }
-.day-summary-split { display: flex; align-items: center; gap: 6px; margin: 6px 0 0; color: var(--muted); font-size: 12px; }
+.day-summary-split { display: grid; flex: 0 0 auto; gap: 4px; margin: 0 0 4px; color: var(--muted); font-size: 11px; line-height: 1.25; text-align: right; }
 .day-summary-split strong { color: var(--blue-deep); }
 .day-summary-split .one-off-text { color: #a37a31; }
 .toast-enter-active, .toast-leave-active { transition: transform .2s ease, opacity .2s ease; }

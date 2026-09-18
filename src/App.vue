@@ -25,14 +25,7 @@ function openEditor(expense: Expense): void {
   <div class="app-shell">
     <div class="app-content">
       <header class="topbar">
-        <div class="brand">
-          <span class="brand-mark" aria-hidden="true">🐾</span>
-          <div>
-            <div class="brand-name">Moneko</div>
-            <div class="brand-caption">只记生活，不记压力</div>
-          </div>
-        </div>
-        <span v-if="expenseStore.isLoading" class="loading-caption">正在打开本地账本…</span>
+        <div class="brand-name">Moneko</div>
       </header>
 
       <main>
@@ -51,7 +44,3 @@ function openEditor(expense: Expense): void {
     />
   </div>
 </template>
-
-<style scoped>
-.loading-caption { color: var(--muted); font-size: 11px; }
-</style>

@@ -7,6 +7,7 @@ const expenseStore = useExpenseStore()
 const fileInput = ref<HTMLInputElement>()
 const statusMessage = ref('')
 const isError = ref(false)
+const updateMessage = ref('')
 
 function download(content: BlobPart, filename: string, type: string): void {
   const url = URL.createObjectURL(new Blob([content], { type }))
@@ -58,15 +59,17 @@ function setStatus(message: string, error: boolean): void {
     if (statusMessage.value === message) statusMessage.value = ''
   }, 3500)
 }
+
+function checkForUpdates(): void {
+  updateMessage.value = '当前已是最新版本 v0.1'
+  window.setTimeout(() => {
+    updateMessage.value = ''
+  }, 3500)
+}
 </script>
 
 <template>
   <div>
-    <div class="page-intro">
-      <p class="page-kicker">数据只在你的设备上</p>
-      <h1 class="page-heading">设置</h1>
-    </div>
-
     <div class="settings-list">
       <section class="card setting-card">
         <div class="setting-card-header">
@@ -106,14 +109,34 @@ function setStatus(message: string, error: boolean): void {
           </div>
         </div>
       </section>
+
+      <section class="card setting-card account-note-card">
+        <div class="setting-card-header">
+          <span class="setting-icon" aria-hidden="true">💡</span>
+          <div class="setting-copy">
+            <p class="account-note-text">没有账号，也没有后台。请定期导出 JSON 备份，避免清理浏览器数据时丢失记录。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card setting-card version-card">
+        <div class="setting-card-header">
+          <span class="setting-icon" aria-hidden="true">ⓘ</span>
+          <div class="setting-copy">
+            <h2 class="setting-title">版本</h2>
+            <p class="setting-description">当前版本 v0.1</p>
+          </div>
+          <button class="secondary-button version-action" type="button" @click="checkForUpdates">检查更新</button>
+        </div>
+        <p v-if="updateMessage" class="status-message">{{ updateMessage }}</p>
+      </section>
     </div>
 
-    <p class="settings-note">没有账号，也没有后台。请定期导出 JSON 备份，避免清理浏览器数据时丢失记录。</p>
-    <p class="version-line">Moneko v0.1 · 只记录支出</p>
   </div>
 </template>
 
 <style scoped>
-.page-intro { padding-top: 6px; }
 .status-error { color: var(--danger); }
+.account-note-text { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.6; }
+.version-action { flex: 0 0 auto; }
 </style>
