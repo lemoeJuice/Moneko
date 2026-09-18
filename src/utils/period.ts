@@ -10,6 +10,8 @@ export interface PeriodRange {
 export function getPeriodRangeFromStart(cycleStartKey: string, expenses: Expense[]): PeriodRange {
   const cycleStart = dateKeyToDate(cycleStartKey)
   const nextCycleStart = new Date(cycleStart.getFullYear(), cycleStart.getMonth() + 1, cycleStart.getDate())
+  cycleStart.setHours(4, 0, 0, 0)
+  nextCycleStart.setHours(4, 0, 0, 0)
   const cycleEnd = new Date(nextCycleStart)
   cycleEnd.setDate(cycleEnd.getDate() - 1)
 
@@ -18,14 +20,14 @@ export function getPeriodRangeFromStart(cycleStartKey: string, expenses: Expense
     .sort((a, b) => a.timestamp - b.timestamp)[0]
 
   return {
-    cycleStartKey: toDateKey(cycleStart.getTime()),
+    cycleStartKey,
     cycleEndKey: toDateKey(cycleEnd.getTime()),
     firstRecordKey: firstRecordedExpense ? toDateKey(firstRecordedExpense.timestamp) : undefined
   }
 }
 
 export function getDefaultPeriodRange(startDay: number, expenses: Expense[], timestamp = Date.now()): PeriodRange {
-  const now = new Date(timestamp)
+  const now = dateKeyToDate(toDateKey(timestamp))
   const safeStartDay = Math.min(28, Math.max(1, Math.round(startDay)))
   let cycleStart = new Date(now.getFullYear(), now.getMonth(), safeStartDay)
 
