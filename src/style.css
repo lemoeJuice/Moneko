@@ -23,6 +23,7 @@ html, body, #app { min-height: 100%; margin: 0; }
 
 body {
   min-width: 320px;
+  overflow-x: hidden;
   background:
     radial-gradient(circle at 10% 0%, rgba(220, 241, 255, .82), transparent 30rem),
     #f7fbff;
@@ -62,9 +63,10 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
 .topbar-inner { display: flex; align-items: center; width: min(100%, 760px); min-height: 48px; margin: 0 auto; padding: 0 16px; }
 .brand-name { font-size: 18px; font-weight: 800; letter-spacing: -.04em; }
 
-.view-viewport { overflow: hidden; touch-action: pan-y; }
+.view-viewport { width: 100vw; margin-left: calc(50% - 50vw); overflow: hidden; touch-action: pan-y; }
 .view-track { display: flex; width: 500%; align-items: flex-start; will-change: transform; }
 .view-panel { flex: 0 0 20%; min-width: 0; }
+.view-panel > * { width: min(calc(100% - 32px), 760px); margin: 0 auto; }
 
 .page-heading { margin: 0; font-size: clamp(25px, 7vw, 34px); letter-spacing: -.055em; line-height: 1.1; }
 .page-kicker { margin: 0 0 8px; color: var(--blue-deep); font-size: 12px; font-weight: 800; letter-spacing: .08em; }
