@@ -34,14 +34,20 @@ function openEditor(expense: Expense): void {
   editingExpense.value = expense
 }
 
+function resetScrollPosition(): void {
+  window.scrollTo({ top: 0, behavior: 'auto' })
+}
+
 function goToView(view: AppView): void {
   const targetIndex = viewOrder.indexOf(view) + 1
   if (targetIndex === displayIndex.value) return
+  resetScrollPosition()
   isAnimating.value = true
   displayIndex.value = targetIndex
 }
 
 function moveView(direction: 1 | -1): void {
+  resetScrollPosition()
   isAnimating.value = true
   displayIndex.value += direction
 }
