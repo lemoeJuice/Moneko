@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import { useExpenseStore } from '../stores/expenseStore'
 import { useSettingsStore } from '../stores/settingsStore'
 import { createBackup, createCsv, parseBackup } from '../utils/backup'
+import { checkForUpdates as fetchLatestApp } from '../pwa'
 
 const expenseStore = useExpenseStore()
 const settingsStore = useSettingsStore()
@@ -10,6 +11,7 @@ const fileInput = ref<HTMLInputElement>()
 const statusMessage = ref('')
 const isError = ref(false)
 const updateMessage = ref('')
+const isCheckingUpdate = ref(false)
 const periodStartDays = Array.from({ length: 28 }, (_, index) => index + 1)
 
 function download(content: BlobPart, filename: string, type: string): void {
@@ -63,10 +65,23 @@ function setStatus(message: string, error: boolean): void {
   }, 3500)
 }
 
-function checkForUpdates(): void {
-  updateMessage.value = '当前已是最新版本 v0.1'
+async function checkForUpdates(): Promise<void> {
+  if (isCheckingUpdate.value) return
+
+  isCheckingUpdate.value = true
+  updateMessage.value = '正在检查更新...'
+
+  try {
+    await fetchLatestApp()
+    updateMessage.value = '已检查，当前已是最新版本 v0.1'
+  } catch (error) {
+    updateMessage.value = error instanceof Error ? error.message : '检查更新失败，请稍后重试'
+  } finally {
+    isCheckingUpdate.value = false
+  }
+
   window.setTimeout(() => {
-    updateMessage.value = ''
+    if (!isCheckingUpdate.value) updateMessage.value = ''
   }, 3500)
 }
 
@@ -152,7 +167,9 @@ function changePeriodStartDay(event: Event): void {
             <h2 class="setting-title">版本</h2>
             <p class="setting-description">当前版本 v0.1</p>
           </div>
-          <button class="secondary-button version-action" type="button" @click="checkForUpdates">检查更新</button>
+           <button class="secondary-button version-action" type="button" :disabled="isCheckingUpdate" @click="checkForUpdates">
+             {{ isCheckingUpdate ? '检查中...' : '检查更新' }}
+           </button>
         </div>
         <p v-if="updateMessage" class="status-message">{{ updateMessage }}</p>
       </section>
