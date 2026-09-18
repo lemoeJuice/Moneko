@@ -155,7 +155,7 @@ function chartTick(ratio: number): string {
               <strong class="chart-total">{{ formatMoney(periodTotal) }}</strong>
             </div>
             <div class="chart-metric one-off-metric">
-              <span class="chart-metric-label">一次性支出</span>
+              <span class="chart-metric-label">一次性</span>
               <strong>{{ formatMoney(oneOffTotal) }}</strong>
             </div>
           </div>
