@@ -10,18 +10,30 @@ export default defineConfig({
     vue(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icon.svg'],
+      includeAssets: ['icon.svg', 'apple-touch-icon.png', 'pwa-192x192.png', 'pwa-512x512.png'],
       manifest: {
         name: 'Moneko 日常支出',
         short_name: 'Moneko',
         description: '轻量、离线优先的日常支出记录',
-        theme_color: '#eaf5ff',
+        theme_color: '#f7fbff',
         background_color: '#f7fbff',
         lang: 'zh-CN',
         display: 'standalone',
         start_url: './',
         scope: './',
         icons: [
+          {
+            src: 'pwa-192x192.png',
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'any maskable'
+          },
+          {
+            src: 'pwa-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'any maskable'
+          },
           {
             src: 'icon.svg',
             sizes: 'any',
