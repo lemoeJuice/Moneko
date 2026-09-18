@@ -5,12 +5,18 @@ import { formatTime } from '../utils/date'
 import type { Expense } from '../types'
 
 defineProps<{ expenses: Expense[] }>()
-defineEmits<{ edit: [expense: Expense] }>()
+const emit = defineEmits<{ edit: [expense: Expense] }>()
+
+function editExpense(event: MouseEvent, expense: Expense): void {
+  const button = event.currentTarget as HTMLButtonElement
+  button.blur()
+  emit('edit', expense)
+}
 </script>
 
 <template>
   <div v-if="expenses.length > 0" class="card expense-list">
-    <button v-for="expense in expenses" :key="expense.id" class="expense-row" type="button" @click="$emit('edit', expense)">
+    <button v-for="expense in expenses" :key="expense.id" class="expense-row" type="button" @click="editExpense($event, expense)">
       <span class="expense-icon" :style="{ backgroundColor: getCategory(expense.categoryId).softColor }" aria-hidden="true">
         {{ getCategory(expense.categoryId).icon }}
       </span>
