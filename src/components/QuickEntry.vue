@@ -52,19 +52,25 @@ async function save(categoryId: Expense['categoryId']): Promise<void> {
 
 <template>
   <section class="card quick-card" aria-labelledby="quick-entry-title">
-    <div class="amount-wrap">
-      <span class="currency-prefix">{{ currencySymbol }}</span>
-      <input
-        id="quick-entry-title"
-        v-model="amount"
-        class="amount-input"
-        inputmode="decimal"
-        autocomplete="off"
-        autofocus
-        placeholder="0.00"
-        aria-label="支出金额"
-        @input="validationMessage = ''"
-      />
+    <div class="amount-entry-row">
+      <div class="amount-wrap">
+        <span class="currency-prefix">{{ currencySymbol }}</span>
+        <input
+          id="quick-entry-title"
+          v-model="amount"
+          class="amount-input"
+          inputmode="decimal"
+          autocomplete="off"
+          autofocus
+          placeholder="0.00"
+          aria-label="支出金额"
+          @input="validationMessage = ''"
+        />
+      </div>
+      <label class="one-off-toggle amount-one-off-toggle">
+        <input v-model="isOneOff" type="checkbox" />
+        <span>一次性</span>
+      </label>
     </div>
     <p class="amount-hint">输入金额后，点一下分类就记好了</p>
 
@@ -84,10 +90,6 @@ async function save(categoryId: Expense['categoryId']): Promise<void> {
 
     <div class="quick-options">
       <input v-model="note" class="note-input" type="text" maxlength="80" placeholder="备注（可选）" />
-      <label class="one-off-toggle">
-        <input v-model="isOneOff" type="checkbox" />
-        <span>一次性支出</span>
-      </label>
     </div>
 
     <div class="schedule-row">

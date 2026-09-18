@@ -105,7 +105,7 @@ function checkForUpdates(): void {
           <span class="setting-icon" aria-hidden="true">🌤️</span>
           <div class="setting-copy">
             <h2 class="setting-title">离线优先</h2>
-            <p class="setting-description">记录保存在本机 IndexedDB。首次加载并缓存完成后，即使没有网络也能继续使用。</p>
+            <p class="setting-description">页面 / 应用首次加载并缓存完成后，即使没有网络也能继续使用。记录保存在本机 IndexedDB。</p>
           </div>
         </div>
       </section>
@@ -114,7 +114,8 @@ function checkForUpdates(): void {
         <div class="setting-card-header">
           <span class="setting-icon" aria-hidden="true">💡</span>
           <div class="setting-copy">
-            <p class="account-note-text">没有账号，也没有后台。请定期导出 JSON 备份，避免清理浏览器数据时丢失记录。</p>
+            <p class="account-note-title">提示</p>
+            <p class="account-note-text">没有账号系统，也没有服务器。</p>
           </div>
         </div>
       </section>
@@ -137,6 +138,7 @@ function checkForUpdates(): void {
 
 <style scoped>
 .status-error { color: var(--danger); }
+.account-note-title { margin: 0 0 3px; color: var(--ink); font-size: 11px; font-weight: 800; }
 .account-note-text { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.6; }
 .version-action { flex: 0 0 auto; }
 </style>

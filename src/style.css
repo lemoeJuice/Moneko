@@ -94,6 +94,9 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
 
 .quick-card { padding: 18px 15px 15px; }
 .amount-wrap { position: relative; display: flex; align-items: baseline; padding: 4px 9px 7px; }
+.amount-entry-row { display: flex; align-items: end; gap: 8px; }
+.amount-entry-row .amount-wrap { flex: 1; min-width: 0; }
+.amount-one-off-toggle { flex: 0 0 auto; margin-bottom: 8px; }
 .currency-prefix { color: var(--blue-deep); font-size: 25px; font-weight: 700; }
 .amount-input {
   width: 100%;
@@ -163,18 +166,19 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
 .stats-date-range { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: end; gap: 8px; margin: 20px 0 15px; }
 .range-field { display: grid; gap: 5px; color: var(--muted); font-size: 11px; font-weight: 750; }
 .range-field input { width: 100%; min-height: 39px; padding: 0 9px; border: 1px solid var(--line); border-radius: 12px; background: #fff; color: var(--ink); font-size: 12px; }
-.range-separator { padding-bottom: 12px; color: var(--faint); font-size: 12px; }
 .range-error { margin: -7px 0 12px; color: var(--danger); font-size: 11px; }
 .chart-card { padding: 17px 12px 13px; }
 .chart-heading { display: flex; align-items: start; justify-content: space-between; gap: 8px; padding: 0 4px 12px; }
 .chart-total { color: var(--blue-deep); font-size: 15px; font-weight: 800; }
 .chart-wrap { overflow: hidden; margin: 0 -2px; }
-.chart-svg { display: block; width: 100%; height: 240px; overflow: visible; }
+.chart-svg { display: block; width: 100%; height: 260px; overflow: visible; }
 .chart-grid-line { stroke: #eaf1f6; stroke-width: 1; }
 .chart-axis-label, .chart-date-label { fill: #9aafbd; font-size: 10px; }
 .chart-date-label { font-size: 9px; }
 .chart-bar { transition: opacity .15s ease; }
-.chart-bar:hover, .chart-bar.selected { opacity: .72; }
+.chart-bar rect:not(.chart-hit-area) { transition: opacity .15s ease; }
+.chart-bar:hover rect:not(.chart-hit-area), .chart-bar.selected rect:not(.chart-hit-area) { opacity: .72; }
+.chart-date-label { pointer-events: none; user-select: none; }
 .chart-tip { margin: 7px 4px 0; padding: 12px; border-radius: 14px; background: #f5faff; }
 .chart-tip-head { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 9px; font-size: 12px; font-weight: 800; }
 .chart-tip-total { color: var(--blue-deep); }

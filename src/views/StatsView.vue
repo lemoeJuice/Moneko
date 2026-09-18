@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { categories, getCategory } from '../constants/categories'
 import { useExpenseStore } from '../stores/expenseStore'
 import { formatMoney } from '../utils/currency'
@@ -25,7 +25,9 @@ const startDateKey = ref(currentMonthStart)
 const endDateKey = ref(todayKey)
 const selectedDayKey = ref<string>()
 
-const chartWidth = 720
+const chartWidth = ref(360)
+const chartWrap = ref<HTMLElement | null>(null)
+let resizeObserver: ResizeObserver | undefined
 const chartTop = 19
 const chartBottom = 204
 const chartLeft = 38
@@ -80,8 +82,19 @@ const categoryStats = computed(() => categories.map((category) => {
 
 watch([startDateKey, endDateKey], () => { selectedDayKey.value = undefined })
 
+onMounted(() => {
+  if (!chartWrap.value) return
+  resizeObserver = new ResizeObserver(([entry]) => {
+    const width = entry?.contentRect.width
+    if (width) chartWidth.value = width
+  })
+  resizeObserver.observe(chartWrap.value)
+})
+
+onBeforeUnmount(() => resizeObserver?.disconnect())
+
 function barSlot(): number {
-  return (chartWidth - chartLeft - chartRight) / rangeDays.value
+  return (chartWidth.value - chartLeft - chartRight) / rangeDays.value
 }
 
 function barX(index: number): number {
@@ -124,13 +137,10 @@ function chartTick(ratio: number): string {
   <div>
     <div class="stats-date-range" aria-label="统计时间范围">
       <label class="range-field">
-        <span>从</span>
-        <input v-model="startDateKey" type="date" />
+        <input v-model="startDateKey" type="date" aria-label="开始日期" />
       </label>
-      <span class="range-separator">至</span>
       <label class="range-field">
-        <span>到</span>
-        <input v-model="endDateKey" type="date" />
+        <input v-model="endDateKey" type="date" aria-label="结束日期" />
       </label>
     </div>
     <p v-if="rangeIsInvalid" class="range-error">结束日期需要晚于开始日期</p>
@@ -144,8 +154,8 @@ function chartTick(ratio: number): string {
         <span class="chart-total">{{ formatMoney(periodTotal) }}</span>
       </div>
 
-      <div class="chart-wrap">
-        <svg class="chart-svg" :viewBox="`0 0 ${chartWidth} 240`" role="img" aria-label="日常支出分类堆叠柱状图">
+      <div ref="chartWrap" class="chart-wrap">
+        <svg class="chart-svg" :viewBox="`0 0 ${chartWidth} 240`" preserveAspectRatio="none" role="img" aria-label="日常支出分类堆叠柱状图">
           <g v-for="ratio in [0, .5, 1]" :key="ratio">
             <line class="chart-grid-line" :x1="chartLeft" :x2="chartWidth - chartRight" :y1="chartBottom - ratio * chartHeight" :y2="chartBottom - ratio * chartHeight" />
             <text class="chart-axis-label" x="2" :y="chartBottom - ratio * chartHeight + 4">{{ chartTick(ratio) }}</text>
@@ -160,7 +170,7 @@ function chartTick(ratio: number): string {
             @click="selectedDayKey = day.key"
             @keydown.enter="selectedDayKey = day.key"
           >
-            <rect :x="barX(index)" :y="chartTop" :width="barWidth()" :height="chartBottom - chartTop" fill="transparent" />
+            <rect class="chart-hit-area" :x="barX(index)" :y="chartTop" :width="barWidth()" :height="chartBottom - chartTop" fill="transparent" />
             <rect
               v-for="segment in day.segments"
               :key="segment.categoryId"
