@@ -158,7 +158,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
 .expense-list { overflow: hidden; }
 .expense-row { display: flex; align-items: center; gap: 11px; width: 100%; padding: 14px 15px; border: 0; border-bottom: 1px solid #edf3f7; background: transparent; color: inherit; text-align: left; touch-action: manipulation; }
 .expense-row:last-child { border-bottom: 0; }
-.expense-row:hover { background: #fbfdff; }
+.expense-row.pressed { background: #e6f4ff; }
 .expense-icon { display: grid; flex: 0 0 auto; width: 39px; height: 39px; place-items: center; border-radius: 13px; font-size: 21px; }
 .expense-info { min-width: 0; flex: 1; }
 .expense-main { display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 750; }
@@ -267,6 +267,10 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
   .category-grid { gap: 11px; }
   .category-button { min-height: 80px; }
   .chart-svg { height: 270px; }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .expense-row:hover { background: #fbfdff; }
 }
 
 @media (min-width: 800px) {
