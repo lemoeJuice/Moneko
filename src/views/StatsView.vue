@@ -110,11 +110,6 @@ function chartTick(ratio: number): string {
 
 <template>
   <div>
-    <div class="page-intro">
-      <p class="page-kicker">看见生活的节奏</p>
-      <h1 class="page-heading">支出统计</h1>
-    </div>
-
     <div class="stats-toolbar" role="tablist" aria-label="统计时间范围">
       <button v-for="days in rangeOptions" :key="days" class="range-button" :class="{ active: rangeDays === days }" type="button" @click="rangeDays = days">
         最近 {{ days }} 天
@@ -217,7 +212,6 @@ function chartTick(ratio: number): string {
 </template>
 
 <style scoped>
-.page-intro { padding-top: 6px; }
 .one-off-row { width: 100%; border: 0; background: transparent; text-align: left; }
 .one-off-row:hover { background: #fffdf7; }
 </style>

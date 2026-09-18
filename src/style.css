@@ -49,30 +49,11 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
 .topbar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   min-height: 48px;
   margin-bottom: 16px;
 }
 
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.brand-mark {
-  display: grid;
-  width: 38px;
-  height: 38px;
-  place-items: center;
-  border-radius: 13px;
-  background: #dff1ff;
-  box-shadow: inset 0 -2px 0 rgba(78, 144, 192, .08);
-  font-size: 21px;
-}
-
 .brand-name { font-size: 18px; font-weight: 800; letter-spacing: -.04em; }
-.brand-caption { margin-top: 1px; color: var(--muted); font-size: 11px; }
 
 .page-heading { margin: 0; font-size: clamp(25px, 7vw, 34px); letter-spacing: -.055em; line-height: 1.1; }
 .page-kicker { margin: 0 0 8px; color: var(--blue-deep); font-size: 12px; font-weight: 800; letter-spacing: .08em; }
@@ -235,10 +216,8 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
 .primary-button:hover { background: var(--blue-deep); }
 .secondary-button { min-height: 38px; padding: 0 14px; border: 1px solid var(--line); border-radius: 11px; background: #fff; color: var(--blue-deep); font-size: 12px; font-weight: 800; }
 .danger-button { min-height: 38px; padding: 0 14px; border: 1px solid #f2dada; border-radius: 11px; background: #fff7f7; color: var(--danger); font-size: 12px; font-weight: 800; }
-.settings-note { margin-top: 17px; color: var(--muted); font-size: 11px; line-height: 1.6; }
 .file-input { display: none; }
 .status-message { margin-top: 10px; color: var(--blue-deep); font-size: 12px; }
-.version-line { margin: 27px 0 0; color: #b3c1ca; font-size: 11px; text-align: center; }
 
 .toast { position: fixed; z-index: 20; right: 16px; bottom: calc(87px + env(safe-area-inset-bottom)); left: 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; width: min(calc(100% - 32px), 420px); margin: auto; padding: 12px 14px; border: 1px solid #cfe5f3; border-radius: 15px; background: #fff; box-shadow: 0 10px 30px rgba(54, 94, 120, .15); color: var(--ink); font-size: 12px; font-weight: 700; }
 .toast button { padding: 5px 8px; border: 0; border-radius: 8px; background: var(--blue-soft); color: var(--blue-deep); font-size: 12px; font-weight: 800; }
