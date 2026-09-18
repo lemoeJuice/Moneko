@@ -60,6 +60,7 @@ async function save(categoryId: Expense['categoryId']): Promise<void> {
         class="amount-input"
         inputmode="decimal"
         autocomplete="off"
+        autofocus
         placeholder="0.00"
         aria-label="支出金额"
         @input="validationMessage = ''"
