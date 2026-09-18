@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onBeforeUnmount, ref } from 'vue'
+import { ref } from 'vue'
 import { getCategory } from '../constants/categories'
 import { formatMoney } from '../utils/currency'
 import { formatTime } from '../utils/date'
@@ -8,26 +8,18 @@ import type { Expense } from '../types'
 defineProps<{ expenses: Expense[] }>()
 const emit = defineEmits<{ edit: [expense: Expense] }>()
 const pressedExpenseId = ref<string | null>(null)
-let editTimer: number | undefined
 
 function editExpense(event: MouseEvent, expense: Expense): void {
   const button = event.currentTarget as HTMLButtonElement
-  pressedExpenseId.value = expense.id
-  if (editTimer) window.clearTimeout(editTimer)
-  editTimer = window.setTimeout(() => {
-    pressedExpenseId.value = null
-    button.blur()
-    window.requestAnimationFrame(() => emit('edit', expense))
-  }, 90)
+  pressedExpenseId.value = null
+  button.blur()
+  window.requestAnimationFrame(() => emit('edit', expense))
 }
 
 function clearPressedExpense(): void {
   pressedExpenseId.value = null
 }
 
-onBeforeUnmount(() => {
-  if (editTimer) window.clearTimeout(editTimer)
-})
 </script>
 
 <template>
@@ -39,7 +31,6 @@ onBeforeUnmount(() => {
       :class="{ pressed: pressedExpenseId === expense.id }"
       type="button"
       @pointerdown="pressedExpenseId = expense.id"
-      @pointerup="clearPressedExpense"
       @pointercancel="clearPressedExpense"
       @click="editExpense($event, expense)"
     >

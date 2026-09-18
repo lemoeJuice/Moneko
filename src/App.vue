@@ -15,6 +15,7 @@ const viewPanels: AppView[] = viewOrder
 const displayIndex = ref(0)
 const isAnimating = ref(true)
 const touchStart = ref<{ x: number; y: number } | null>(null)
+const panelRefs = ref<Array<HTMLElement | null>>([])
 const editingExpense = ref<Expense | null>(null)
 const expenseStore = useExpenseStore()
 
@@ -34,22 +35,28 @@ function openEditor(expense: Expense): void {
   editingExpense.value = expense
 }
 
-function resetScrollPosition(): void {
+function setPanelRef(element: unknown, index: number): void {
+  panelRefs.value[index] = element instanceof HTMLElement ? element : null
+}
+
+function resetScrollPosition(targetIndex = displayIndex.value): void {
   window.scrollTo({ top: 0, behavior: 'auto' })
+  panelRefs.value[targetIndex]?.scrollTo({ top: 0, behavior: 'auto' })
 }
 
 function goToView(view: AppView): void {
   const targetIndex = viewOrder.indexOf(view)
   if (targetIndex === displayIndex.value) return
-  resetScrollPosition()
+  resetScrollPosition(targetIndex)
   isAnimating.value = true
   displayIndex.value = targetIndex
 }
 
 function moveView(direction: 1 | -1): void {
-  resetScrollPosition()
+  const targetIndex = Math.max(0, Math.min(viewOrder.length - 1, displayIndex.value + direction))
+  resetScrollPosition(targetIndex)
   isAnimating.value = true
-  displayIndex.value = Math.max(0, Math.min(viewOrder.length - 1, displayIndex.value + direction))
+  displayIndex.value = targetIndex
 }
 
 function handleTouchStart(event: TouchEvent): void {
@@ -86,8 +93,8 @@ onBeforeUnmount(() => { touchStart.value = null })
         @touchend="handleTouchEnd"
       >
         <div class="view-track" :style="trackStyle">
-          <section v-for="(view, index) in viewPanels" :key="`${view}-${index}`" class="view-panel">
-            <HomeView v-if="view === 'home'" @edit="openEditor" />
+          <section v-for="(view, index) in viewPanels" :key="`${view}-${index}`" :ref="(element) => setPanelRef(element, index)" class="view-panel">
+            <HomeView v-if="view === 'home'" :is-active="activeView === 'home'" @edit="openEditor" />
             <StatsView v-else-if="view === 'stats'" @edit="openEditor" />
             <SettingsView v-else />
           </section>

@@ -7,6 +7,7 @@ import { formatDateHeading, isToday, toDateKey } from '../utils/date'
 import { formatMoney } from '../utils/currency'
 import type { Expense } from '../types'
 
+defineProps<{ isActive: boolean }>()
 const emit = defineEmits<{ edit: [expense: Expense] }>()
 const expenseStore = useExpenseStore()
 const selectedDate = ref(toDateKey())
@@ -91,12 +92,12 @@ onBeforeUnmount(() => {
       </div>
     </Transition>
 
-    <button class="floating-add" type="button" aria-label="新增支出" @click="showQuickEntry = true">
-      <span aria-hidden="true">+</span>
-    </button>
-
     <Teleport to="body">
-      <div v-if="showQuickEntry" class="modal-backdrop" @click.self="showQuickEntry = false">
+      <button v-if="isActive" class="floating-add" type="button" aria-label="新增支出" @click="showQuickEntry = true">
+        <span aria-hidden="true">+</span>
+      </button>
+
+      <div v-if="showQuickEntry && isActive" class="modal-backdrop" @click.self="showQuickEntry = false">
         <section class="modal entry-modal" role="dialog" aria-modal="true" aria-labelledby="new-entry-title">
           <div class="modal-header">
             <h2 id="new-entry-title" class="modal-title">新记录</h2>

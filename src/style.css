@@ -63,9 +63,9 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
 .topbar-inner { display: flex; align-items: center; width: min(100%, 760px); min-height: 48px; margin: 0 auto; padding: 0 16px; }
 .brand-name { font-size: 18px; font-weight: 800; letter-spacing: -.04em; }
 
-.view-viewport { width: 100vw; margin-left: calc(50% - 50vw); overflow: hidden; touch-action: pan-y; }
-.view-track { display: flex; width: 300%; align-items: flex-start; will-change: transform; }
-.view-panel { flex: 0 0 33.333333%; min-width: 0; }
+.view-viewport { width: 100vw; height: calc(100vh - var(--app-top-padding) - 160px - env(safe-area-inset-bottom)); height: calc(100dvh - var(--app-top-padding) - 160px - env(safe-area-inset-bottom)); min-height: 360px; margin-left: calc(50% - 50vw); overflow: hidden; touch-action: pan-y; }
+.view-track { display: flex; width: 300%; height: 100%; align-items: stretch; will-change: transform; }
+.view-panel { flex: 0 0 33.333333%; min-width: 0; height: 100%; padding-bottom: 24px; overflow-y: auto; overscroll-behavior-y: contain; scrollbar-width: thin; }
 .view-panel > * { width: min(calc(100% - 32px), 760px); margin: 0 auto; }
 
 .page-heading { margin: 0; font-size: clamp(25px, 7vw, 34px); letter-spacing: -.055em; line-height: 1.1; }
@@ -275,6 +275,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
 
 @media (min-width: 800px) {
   .app-shell { --app-top-padding: 30px; padding-top: calc(var(--app-top-padding) + 64px); }
+  .view-viewport { height: calc(100vh - var(--app-top-padding) - 110px); height: calc(100dvh - var(--app-top-padding) - 110px); }
   .bottom-nav { top: 0; right: auto; bottom: auto; left: auto; width: 240px; padding: 0; border: 0; background: transparent; backdrop-filter: none; }
   .bottom-nav-inner { position: fixed; top: 30px; left: max(28px, calc(50% - 380px)); display: flex; gap: 5px; width: auto; }
   .nav-button { display: flex; gap: 6px; min-height: 38px; padding: 0 11px; }
