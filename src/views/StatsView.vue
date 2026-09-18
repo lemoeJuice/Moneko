@@ -139,6 +139,7 @@ function chartTick(ratio: number): string {
       <label class="range-field">
         <input v-model="startDateKey" type="date" aria-label="开始日期" />
       </label>
+      <span class="range-separator">至</span>
       <label class="range-field">
         <input v-model="endDateKey" type="date" aria-label="结束日期" />
       </label>

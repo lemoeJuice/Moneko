@@ -115,7 +115,7 @@ function checkForUpdates(): void {
           <span class="setting-icon" aria-hidden="true">💡</span>
           <div class="setting-copy">
             <p class="account-note-title">提示</p>
-            <p class="account-note-text">没有账号系统，也没有服务器。</p>
+            <p class="account-note-text">没有账号系统，也没有服务器。请定期导出 JSON 备份，避免清理浏览器数据时丢失记录。</p>
           </div>
         </div>
       </section>
