@@ -5,7 +5,7 @@ import { useExpenseStore } from '../stores/expenseStore'
 import { useSettingsStore } from '../stores/settingsStore'
 import { formatMoney } from '../utils/currency'
 import { dateKeyFromOffset, dateKeyToDate, formatDateHeading, formatShortDate, toDateKey } from '../utils/date'
-import { countPeriodDays, getDefaultPeriodRange } from '../utils/period'
+import { countPeriodDays, getDefaultPeriodRange, getPeriodRangeFromStart } from '../utils/period'
 import type { CategoryId, Expense } from '../types'
 
 interface ChartSegment {
@@ -23,11 +23,11 @@ const emit = defineEmits<{ edit: [expense: Expense] }>()
 const expenseStore = useExpenseStore()
 const settingsStore = useSettingsStore()
 const initialRange = getDefaultPeriodRange(settingsStore.periodStartDay, expenseStore.expenses)
+const defaultCycleStartKey = ref(initialRange.cycleStartKey)
 const startDateKey = ref(initialRange.cycleStartKey)
 const endDateKey = ref(initialRange.cycleEndKey)
 const isCustomRange = ref(false)
 const selectedDayKey = ref<string>()
-const showPeriodPicker = ref(false)
 
 const chartWidth = ref(360)
 const chartWrap = ref<HTMLElement | null>(null)
@@ -45,7 +45,7 @@ const rangeDays = computed(() => countPeriodDays(effectiveStartKey.value, effect
 const todayKey = toDateKey()
 const dataStartKey = computed(() => {
   if (isCustomRange.value || rangeIsInvalid.value) return effectiveStartKey.value
-  return getDefaultPeriodRange(settingsStore.periodStartDay, expenseStore.expenses).firstRecordKey ?? effectiveStartKey.value
+  return getPeriodRangeFromStart(defaultCycleStartKey.value, expenseStore.expenses).firstRecordKey ?? effectiveStartKey.value
 })
 const dataEndKey = computed(() => effectiveEndKey.value < todayKey ? effectiveEndKey.value : todayKey)
 const averageEndKey = computed(() => dataEndKey.value >= todayKey ? dateKeyFromOffset(-1) : dataEndKey.value)
@@ -94,6 +94,7 @@ const categoryStats = computed(() => categories.map((category) => {
 function resetDefaultRange(): void {
   const range = getDefaultPeriodRange(settingsStore.periodStartDay, expenseStore.expenses)
   isCustomRange.value = false
+  defaultCycleStartKey.value = range.cycleStartKey
   startDateKey.value = range.cycleStartKey
   endDateKey.value = range.cycleEndKey
   selectedDayKey.value = undefined
@@ -101,6 +102,17 @@ function resetDefaultRange(): void {
 
 function markCustomRange(): void {
   isCustomRange.value = true
+  selectedDayKey.value = undefined
+}
+
+function shiftCycle(direction: -1 | 1): void {
+  const currentStart = dateKeyToDate(startDateKey.value)
+  currentStart.setMonth(currentStart.getMonth() + direction)
+  const range = getPeriodRangeFromStart(toDateKey(currentStart.getTime()), expenseStore.expenses)
+  isCustomRange.value = false
+  defaultCycleStartKey.value = range.cycleStartKey
+  startDateKey.value = range.cycleStartKey
+  endDateKey.value = range.cycleEndKey
   selectedDayKey.value = undefined
 }
 
@@ -162,7 +174,7 @@ function chartTick(ratio: number): string {
 
 <template>
   <div>
-      <div v-if="showPeriodPicker" class="stats-date-range" aria-label="统计时间范围">
+      <div class="stats-date-range" aria-label="统计时间范围">
       <label class="range-field">
         <input v-model="startDateKey" type="date" aria-label="开始日期" @change="markCustomRange" />
       </label>
@@ -185,9 +197,10 @@ function chartTick(ratio: number): string {
               <span class="chart-metric-label">一次性</span>
               <strong>{{ formatMoney(oneOffTotal) }}</strong>
             </div>
-            <button class="period-switch-button" type="button" @click="showPeriodPicker = !showPeriodPicker">
-              {{ showPeriodPicker ? '收起周期' : '切换周期' }}
-            </button>
+            <span class="period-cycle-actions" aria-label="切换统计周期">
+              <button class="icon-button" type="button" aria-label="上一个周期" @click="shiftCycle(-1)">‹</button>
+              <button class="icon-button" type="button" aria-label="下一个周期" @click="shiftCycle(1)">›</button>
+            </span>
           </div>
           <p class="section-subtitle">按天、按分类堆叠</p>
         </div>
