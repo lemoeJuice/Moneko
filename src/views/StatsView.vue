@@ -23,10 +23,11 @@ const emit = defineEmits<{ edit: [expense: Expense] }>()
 const expenseStore = useExpenseStore()
 const settingsStore = useSettingsStore()
 const initialRange = getDefaultPeriodRange(settingsStore.periodStartDay, expenseStore.expenses)
-const startDateKey = ref(initialRange.startKey)
-const endDateKey = ref(initialRange.endKey)
+const startDateKey = ref(initialRange.cycleStartKey)
+const endDateKey = ref(initialRange.cycleEndKey)
 const isCustomRange = ref(false)
 const selectedDayKey = ref<string>()
+const showPeriodPicker = ref(false)
 
 const chartWidth = ref(360)
 const chartWrap = ref<HTMLElement | null>(null)
@@ -41,13 +42,24 @@ const rangeIsInvalid = computed(() => startDateKey.value > endDateKey.value)
 const effectiveStartKey = computed(() => rangeIsInvalid.value ? endDateKey.value : startDateKey.value)
 const effectiveEndKey = computed(() => endDateKey.value)
 const rangeDays = computed(() => countPeriodDays(effectiveStartKey.value, effectiveEndKey.value))
+const todayKey = toDateKey()
+const dataStartKey = computed(() => {
+  if (isCustomRange.value || rangeIsInvalid.value) return effectiveStartKey.value
+  return getDefaultPeriodRange(settingsStore.periodStartDay, expenseStore.expenses).firstRecordKey ?? effectiveStartKey.value
+})
+const dataEndKey = computed(() => effectiveEndKey.value < todayKey ? effectiveEndKey.value : todayKey)
+const averageEndKey = computed(() => dataEndKey.value >= todayKey ? dateKeyFromOffset(-1) : dataEndKey.value)
+const averageDays = computed(() => {
+  if (averageEndKey.value < dataStartKey.value) return 0
+  return countPeriodDays(dataStartKey.value, averageEndKey.value)
+})
 
 const chartDays = computed<ChartDay[]>(() => {
   const result: ChartDay[] = []
   const startTimestamp = dateKeyToDate(effectiveStartKey.value).getTime()
   for (let index = 0; index < rangeDays.value; index += 1) {
     const key = dateKeyFromOffset(index, startTimestamp)
-    const dailyExpenses = expenseStore.expenses.filter((expense) => !expense.isOneOff && toDateKey(expense.timestamp) === key)
+    const dailyExpenses = expenseStore.expenses.filter((expense) => !expense.isOneOff && key >= dataStartKey.value && key <= dataEndKey.value && toDateKey(expense.timestamp) === key)
     const segments = categories
       .map((category) => ({
         categoryId: category.id,
@@ -62,8 +74,8 @@ const chartDays = computed<ChartDay[]>(() => {
 const maxDaily = computed(() => Math.max(1, ...chartDays.value.map((day) => day.total)))
 const periodTotal = computed(() => chartDays.value.reduce((sum, day) => sum + day.total, 0))
 const selectedDay = computed(() => chartDays.value.find((day) => day.key === selectedDayKey.value) ?? chartDays.value[chartDays.value.length - 1])
-const periodStartKey = effectiveStartKey
-const periodEndKey = effectiveEndKey
+const periodStartKey = dataStartKey
+const periodEndKey = dataEndKey
 
 const periodOneOffs = computed(() => expenseStore.expenses
   .filter((expense) => expense.isOneOff)
@@ -76,14 +88,14 @@ const oneOffTotal = computed(() => periodOneOffs.value.reduce((sum, expense) => 
 
 const categoryStats = computed(() => categories.map((category) => {
   const total = chartDays.value.reduce((sum, day) => sum + (day.segments.find((segment) => segment.categoryId === category.id)?.amount ?? 0), 0)
-  return { category, total, average: total / rangeDays.value }
+  return { category, total, average: averageDays.value > 0 ? total / averageDays.value : 0 }
 }))
 
 function resetDefaultRange(): void {
   const range = getDefaultPeriodRange(settingsStore.periodStartDay, expenseStore.expenses)
   isCustomRange.value = false
-  startDateKey.value = range.startKey
-  endDateKey.value = range.endKey
+  startDateKey.value = range.cycleStartKey
+  endDateKey.value = range.cycleEndKey
   selectedDayKey.value = undefined
 }
 
@@ -150,7 +162,7 @@ function chartTick(ratio: number): string {
 
 <template>
   <div>
-    <div class="stats-date-range" aria-label="统计时间范围">
+      <div v-if="showPeriodPicker" class="stats-date-range" aria-label="统计时间范围">
       <label class="range-field">
         <input v-model="startDateKey" type="date" aria-label="开始日期" @change="markCustomRange" />
       </label>
@@ -173,6 +185,9 @@ function chartTick(ratio: number): string {
               <span class="chart-metric-label">一次性</span>
               <strong>{{ formatMoney(oneOffTotal) }}</strong>
             </div>
+            <button class="period-switch-button" type="button" @click="showPeriodPicker = !showPeriodPicker">
+              {{ showPeriodPicker ? '收起周期' : '切换周期' }}
+            </button>
           </div>
           <p class="section-subtitle">按天、按分类堆叠</p>
         </div>
@@ -228,9 +243,9 @@ function chartTick(ratio: number): string {
       <div class="average-hero">
         <div>
           <div class="average-label">平均每日生活成本</div>
-          <div class="average-value">{{ formatMoney(Math.round(periodTotal / rangeDays), true) }}<span class="average-unit">/ 天</span></div>
+          <div class="average-value">{{ formatMoney(averageDays > 0 ? Math.round(periodTotal / averageDays) : 0, true) }}<span class="average-unit">/ 天</span></div>
         </div>
-        <div class="summary-caption">按 {{ rangeDays }} 个自然日计算<br />不含一次性支出</div>
+        <div class="summary-caption">按 {{ averageDays }} 个自然日计算<br />不含一次性支出</div>
       </div>
       <div class="summary-table">
         <div class="summary-row header"><span>分类</span><span class="summary-amount">日均</span><span class="summary-amount">周期累计</span></div>
