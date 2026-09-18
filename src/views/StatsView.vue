@@ -149,13 +149,18 @@ function chartTick(ratio: number): string {
     <section class="card chart-card">
       <div class="chart-heading">
         <div>
-          <div class="chart-title-row">
-            <h2 class="section-title">日常支出</h2>
-            <span class="chart-exclusion">一次性支出 {{ formatMoney(oneOffTotal) }}</span>
+          <div class="chart-metrics">
+            <div class="chart-metric">
+              <span class="chart-metric-label">日常支出</span>
+              <strong class="chart-total">{{ formatMoney(periodTotal) }}</strong>
+            </div>
+            <div class="chart-metric one-off-metric">
+              <span class="chart-metric-label">一次性支出</span>
+              <strong>{{ formatMoney(oneOffTotal) }}</strong>
+            </div>
           </div>
           <p class="section-subtitle">按天、按分类堆叠</p>
         </div>
-        <span class="chart-total">{{ formatMoney(periodTotal) }}</span>
       </div>
 
       <div ref="chartWrap" class="chart-wrap">
