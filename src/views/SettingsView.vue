@@ -138,7 +138,7 @@ function checkForUpdates(): void {
 
 <style scoped>
 .status-error { color: var(--danger); }
-.account-note-title { margin: 0 0 3px; color: var(--ink); font-size: 11px; font-weight: 800; }
-.account-note-text { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.6; }
+.account-note-title { margin: 0; color: var(--ink); font-size: 14px; font-weight: 800; }
+.account-note-text { margin: 4px 0 0; color: var(--muted); font-size: 11px; line-height: 1.5; }
 .version-action { flex: 0 0 auto; }
 </style>
