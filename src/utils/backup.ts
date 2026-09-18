@@ -1,5 +1,6 @@
 import { getCategory, isCategoryId } from '../constants/categories'
 import type { BackupPayload, Expense } from '../types'
+import { toDateKey } from './date'
 
 export const BACKUP_VERSION = 1 as const
 
@@ -63,7 +64,7 @@ export function createCsv(expenses: Expense[]): string {
   const header = ['日期', '时间', '分类', '一次性支出', '备注', '金额']
   const rows = expenses.map((expense) => {
     const date = new Date(expense.timestamp)
-    const dateText = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+    const dateText = toDateKey(expense.timestamp)
     const timeText = `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`
     return [dateText, timeText, `${getCategory(expense.categoryId).icon} ${getCategory(expense.categoryId).label}`, expense.isOneOff ? '是' : '否', expense.note ?? '', (expense.amount / 100).toFixed(2)]
   })

@@ -3,7 +3,7 @@ import { ref, watch } from 'vue'
 import { categories } from '../constants/categories'
 import { useExpenseStore } from '../stores/expenseStore'
 import { currencySymbol, parseAmountInput } from '../utils/currency'
-import { timeInputFromTimestamp, timestampFromDateTimeInput } from '../utils/date'
+import { timeInputFromTimestamp, timestampFromBusinessDateTimeInput } from '../utils/date'
 import type { Expense } from '../types'
 
 const props = defineProps<{ selectedDate: string }>()
@@ -39,7 +39,7 @@ async function save(categoryId: Expense['categoryId']): Promise<void> {
     categoryId,
     isOneOff: isOneOff.value,
     note: note.value,
-    timestamp: timestampFromDateTimeInput(`${entryDate.value}T${entryTime.value}`)
+    timestamp: timestampFromBusinessDateTimeInput(`${entryDate.value}T${entryTime.value}`)
   })
 
   amount.value = ''
