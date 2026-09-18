@@ -30,7 +30,7 @@ body {
 }
 
 button, input, textarea { font: inherit; }
-button { cursor: pointer; }
+button { cursor: pointer; -webkit-tap-highlight-color: transparent; }
 
 button:focus-visible, input:focus-visible, textarea:focus-visible {
   outline: 3px solid rgba(93, 169, 223, .3);
@@ -156,7 +156,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
 .section-header { display: flex; align-items: end; justify-content: space-between; gap: 12px; margin-bottom: 11px; }
 .flow-total { color: var(--muted); font-size: 12px; font-weight: 700; }
 .expense-list { overflow: hidden; }
-.expense-row { display: flex; align-items: center; gap: 11px; width: 100%; padding: 14px 15px; border: 0; border-bottom: 1px solid #edf3f7; background: transparent; color: inherit; text-align: left; }
+.expense-row { display: flex; align-items: center; gap: 11px; width: 100%; padding: 14px 15px; border: 0; border-bottom: 1px solid #edf3f7; background: transparent; color: inherit; text-align: left; touch-action: manipulation; }
 .expense-row:last-child { border-bottom: 0; }
 .expense-row:hover { background: #fbfdff; }
 .expense-icon { display: grid; flex: 0 0 auto; width: 39px; height: 39px; place-items: center; border-radius: 13px; font-size: 21px; }
