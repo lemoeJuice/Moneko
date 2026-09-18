@@ -19,6 +19,15 @@ interface ChartDay {
   segments: ChartSegment[]
 }
 
+function getChartScaleMax(value: number): number {
+  if (value <= 5) return 5
+
+  const magnitude = 10 ** Math.floor(Math.log10(value))
+  const normalized = value / magnitude
+  const step = normalized <= 1 ? 1 : normalized <= 2 ? 2 : normalized <= 5 ? 5 : 10
+  return step * magnitude
+}
+
 const emit = defineEmits<{ edit: [expense: Expense] }>()
 const expenseStore = useExpenseStore()
 const settingsStore = useSettingsStore()
@@ -78,7 +87,7 @@ const chartDays = computed<ChartDay[]>(() => {
   return result
 })
 
-const maxDaily = computed(() => Math.max(1, ...chartDays.value.map((day) => day.total)))
+const chartScaleMax = computed(() => getChartScaleMax(Math.max(0, ...chartDays.value.map((day) => day.total))))
 const periodTotal = computed(() => chartDays.value.reduce((sum, day) => sum + day.total, 0))
 const selectedDay = computed(() => chartDays.value.find((day) => day.key === selectedDayKey.value) ?? chartDays.value[chartDays.value.length - 1])
 const averageTotal = computed(() => chartDays.value
@@ -162,11 +171,11 @@ function segmentY(day: ChartDay, segment: ChartSegment): number {
     if (current.categoryId === segment.categoryId) break
     consumed += current.amount
   }
-  return chartBottom - ((consumed + segment.amount) / maxDaily.value) * chartHeight
+  return chartBottom - ((consumed + segment.amount) / chartScaleMax.value) * chartHeight
 }
 
 function segmentHeight(segment: ChartSegment): number {
-  return (segment.amount / maxDaily.value) * chartHeight
+  return (segment.amount / chartScaleMax.value) * chartHeight
 }
 
 function shouldShowDateLabel(index: number): boolean {
@@ -176,7 +185,7 @@ function shouldShowDateLabel(index: number): boolean {
 }
 
 function chartTick(ratio: number): string {
-  return formatMoney(Math.round(maxDaily.value * ratio))
+  return formatMoney(Math.round(chartScaleMax.value * ratio))
 }
 
 </script>
