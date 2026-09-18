@@ -42,7 +42,7 @@ function clearPressedExpense(): void {
           <span>{{ getCategory(expense.categoryId).label }}</span>
           <span v-if="expense.isOneOff" class="one-off-badge">一次性</span>
         </span>
-        <span class="expense-note">{{ expense.note || '无备注' }}</span>
+        <span v-if="expense.note" class="expense-note">{{ expense.note }}</span>
       </span>
       <span class="expense-time">{{ formatTime(expense.timestamp) }}</span>
       <span class="expense-amount">{{ formatMoney(expense.amount) }}</span>
