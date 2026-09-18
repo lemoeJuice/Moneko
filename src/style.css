@@ -110,9 +110,9 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
 
 .quick-card { padding: 18px 15px 15px; }
 .amount-wrap { position: relative; display: flex; align-items: baseline; padding: 4px 9px 7px; }
-.amount-entry-row { display: flex; align-items: end; gap: 8px; }
+.amount-entry-row { display: flex; align-items: center; gap: 8px; }
 .amount-entry-row .amount-wrap { flex: 1; min-width: 0; }
-.amount-one-off-toggle { flex: 0 0 auto; margin-bottom: 8px; }
+.amount-one-off-toggle { flex: 0 0 auto; }
 .currency-prefix { color: var(--blue-deep); font-size: 25px; font-weight: 700; }
 .amount-input {
   width: 100%;
@@ -127,6 +127,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
   line-height: 1.05;
 }
 .amount-input::placeholder { color: #c9d9e5; }
+.amount-input:focus, .amount-input:focus-visible { outline: none !important; box-shadow: none; }
 .amount-hint { margin: 0 9px 13px; color: var(--faint); font-size: 12px; }
 
 .category-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
