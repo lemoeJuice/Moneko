@@ -52,7 +52,13 @@ async function remove(): Promise<void> {
 
         <div class="form-field">
           <label class="form-label" for="edit-amount">金额</label>
-          <input id="edit-amount" v-model="amount" class="form-input" inputmode="decimal" />
+          <div class="edit-amount-row">
+            <input id="edit-amount" v-model="amount" class="form-input" inputmode="decimal" />
+            <label class="one-off-toggle edit-one-off-toggle">
+              <input v-model="isOneOff" type="checkbox" />
+              <span>一次性</span>
+            </label>
+          </div>
         </div>
 
         <div class="form-field">
@@ -81,11 +87,6 @@ async function remove(): Promise<void> {
           <input id="edit-note" v-model="note" class="form-input" maxlength="80" placeholder="可选" />
         </div>
 
-        <label class="one-off-toggle modal-toggle">
-          <input v-model="isOneOff" type="checkbox" />
-          <span>一次性支出</span>
-        </label>
-
         <p v-if="errorMessage" class="validation-message">{{ errorMessage }}</p>
         <div class="modal-actions">
           <button class="danger-button" type="button" @click="remove">删除</button>
@@ -100,6 +101,8 @@ async function remove(): Promise<void> {
 </template>
 
 <style scoped>
-.modal-toggle { display: inline-flex; margin-top: 15px; }
+.edit-amount-row { display: flex; align-items: center; gap: 8px; }
+.edit-amount-row .form-input { min-width: 0; }
+.edit-one-off-toggle { flex: 0 0 auto; }
 .validation-message { margin: 8px 0 0; color: var(--danger); font-size: 11px; }
 </style>
