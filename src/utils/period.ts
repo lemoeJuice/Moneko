@@ -2,8 +2,9 @@ import type { Expense } from '../types'
 import { dateKeyToDate, toDateKey } from './date'
 
 export interface PeriodRange {
-  startKey: string
-  endKey: string
+  cycleStartKey: string
+  cycleEndKey: string
+  firstRecordKey?: string
 }
 
 export function getDefaultPeriodRange(startDay: number, expenses: Expense[], timestamp = Date.now()): PeriodRange {
@@ -24,8 +25,9 @@ export function getDefaultPeriodRange(startDay: number, expenses: Expense[], tim
     .sort((a, b) => a.timestamp - b.timestamp)[0]
 
   return {
-    startKey: firstRecordedExpense ? toDateKey(firstRecordedExpense.timestamp) : toDateKey(cycleStart.getTime()),
-    endKey: toDateKey(cycleEnd.getTime())
+    cycleStartKey: toDateKey(cycleStart.getTime()),
+    cycleEndKey: toDateKey(cycleEnd.getTime()),
+    firstRecordKey: firstRecordedExpense ? toDateKey(firstRecordedExpense.timestamp) : undefined
   }
 }
 
