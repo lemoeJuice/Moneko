@@ -17,6 +17,7 @@ export default defineConfig({
         description: '轻量、离线优先的日常支出记录',
         theme_color: '#eaf5ff',
         background_color: '#f7fbff',
+        lang: 'zh-CN',
         display: 'standalone',
         start_url: './',
         scope: './',
