@@ -85,14 +85,14 @@ onBeforeUnmount(() => {
       <ExpenseList :expenses="dayExpenses" @edit="emit('edit', $event)" />
     </section>
 
-    <Transition name="toast">
-      <div v-if="toastVisible" class="toast">
-        <span>已记录，今天也照顾好自己</span>
-        <button type="button" @click="undo">撤销</button>
-      </div>
-    </Transition>
-
     <Teleport to="body">
+      <Transition name="toast">
+        <div v-if="toastVisible && isActive" class="toast">
+          <span>已记录，今天也照顾好自己</span>
+          <button type="button" @click="undo">撤销</button>
+        </div>
+      </Transition>
+
       <button v-if="isActive" class="floating-add" type="button" aria-label="新增支出" @click="showQuickEntry = true">
         <span aria-hidden="true">+</span>
       </button>

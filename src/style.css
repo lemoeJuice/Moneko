@@ -253,7 +253,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
 .file-input { display: none; }
 .status-message { margin-top: 10px; color: var(--blue-deep); font-size: 12px; }
 
-.toast { position: fixed; z-index: 20; right: 16px; bottom: calc(87px + env(safe-area-inset-bottom)); left: 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; width: min(calc(100% - 32px), 420px); margin: auto; padding: 12px 14px; border: 1px solid #cfe5f3; border-radius: 15px; background: #fff; box-shadow: 0 10px 30px rgba(54, 94, 120, .15); color: var(--ink); font-size: 12px; font-weight: 700; }
+.toast { position: fixed; z-index: 20; right: 16px; bottom: calc(87px + env(safe-area-inset-bottom)); left: 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; width: min(calc(100vw - 32px), 420px); margin: auto; padding: 12px 14px; border: 1px solid #cfe5f3; border-radius: 15px; background: #fff; box-shadow: 0 10px 30px rgba(54, 94, 120, .15); color: var(--ink); font-size: 12px; font-weight: 700; }
 .toast button { padding: 5px 8px; border: 0; border-radius: 8px; background: var(--blue-soft); color: var(--blue-deep); font-size: 12px; font-weight: 800; }
 
 .floating-add { position: fixed; z-index: 9; right: max(20px, calc((100vw - 760px) / 2 + 16px)); bottom: calc(84px + env(safe-area-inset-bottom)); display: grid; width: 58px; height: 58px; place-items: center; border: 0; border-radius: 20px; background: var(--blue); box-shadow: 0 12px 26px rgba(52, 123, 173, .28); color: #fff; font-size: 35px; font-weight: 300; line-height: 1; transition: transform .16s ease, background .16s ease; }
