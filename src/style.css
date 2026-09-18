@@ -37,8 +37,9 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
 }
 
 .app-shell {
+  --app-top-padding: max(18px, env(safe-area-inset-top));
   min-height: 100vh;
-  padding: max(18px, env(safe-area-inset-top)) 16px calc(96px + env(safe-area-inset-bottom));
+  padding: var(--app-top-padding) 16px calc(96px + env(safe-area-inset-bottom));
 }
 
 .app-content {
@@ -47,10 +48,18 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
 }
 
 .topbar {
+  position: sticky;
+  z-index: 12;
+  top: 0;
   display: flex;
   align-items: center;
-  min-height: 48px;
+  min-height: calc(48px + var(--app-top-padding));
+  margin-top: calc(var(--app-top-padding) * -1);
   margin-bottom: 16px;
+  padding-top: var(--app-top-padding);
+  background: rgba(247, 251, 255, .94);
+  box-shadow: 0 6px 14px rgba(66, 117, 148, .04);
+  backdrop-filter: blur(12px);
 }
 
 .brand-name { font-size: 18px; font-weight: 800; letter-spacing: -.04em; }
@@ -166,6 +175,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
 .stats-date-range { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: end; gap: 8px; margin: 20px 0 15px; }
 .range-field { display: grid; gap: 5px; color: var(--muted); font-size: 11px; font-weight: 750; }
 .range-field input { width: 100%; min-height: 39px; padding: 0 9px; border: 1px solid var(--line); border-radius: 12px; background: #fff; color: var(--ink); font-size: 12px; }
+.range-separator { padding-bottom: 12px; color: var(--faint); font-size: 12px; text-align: center; }
 .range-error { margin: -7px 0 12px; color: var(--danger); font-size: 11px; }
 .chart-card { padding: 17px 12px 13px; }
 .chart-heading { display: flex; align-items: start; justify-content: space-between; gap: 8px; padding: 0 4px 12px; }
@@ -254,7 +264,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
 }
 
 @media (min-width: 800px) {
-  .app-shell { padding-top: 30px; }
+  .app-shell { --app-top-padding: 30px; padding-top: var(--app-top-padding); }
   .bottom-nav { top: 0; right: auto; bottom: auto; left: auto; width: 240px; padding: 0; border: 0; background: transparent; backdrop-filter: none; }
   .bottom-nav-inner { position: fixed; top: 30px; left: max(28px, calc(50% - 380px)); display: flex; gap: 5px; width: auto; }
   .nav-button { display: flex; gap: 6px; min-height: 38px; padding: 0 11px; }
