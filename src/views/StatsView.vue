@@ -61,7 +61,9 @@ const chartDays = computed<ChartDay[]>(() => {
   if (statsRangeIsInvalid.value) return []
 
   const result: ChartDay[] = []
-  const startTimestamp = dateKeyToDate(statsStartKey.value).getTime()
+  const startDate = dateKeyToDate(statsStartKey.value)
+  startDate.setHours(12, 0, 0, 0)
+  const startTimestamp = startDate.getTime()
   for (let index = 0; index < rangeDays.value; index += 1) {
     const key = dateKeyFromOffset(index, startTimestamp)
     const dailyExpenses = expenseStore.expenses.filter((expense) => !expense.isOneOff && toDateKey(expense.timestamp) === key)
