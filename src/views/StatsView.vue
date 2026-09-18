@@ -5,7 +5,7 @@ import { useExpenseStore } from '../stores/expenseStore'
 import { useSettingsStore } from '../stores/settingsStore'
 import { formatMoney } from '../utils/currency'
 import { dateKeyFromOffset, dateKeyToDate, formatDateHeading, formatShortDate, toDateKey } from '../utils/date'
-import { countPeriodDays, getDefaultPeriodRange, getPeriodRangeFromStart } from '../utils/period'
+import { countPeriodDays, getDefaultPeriodRange, getMaxPeriodEnd, getMinPeriodStart, isPeriodRangeValid, shiftPeriodEndpoint } from '../utils/period'
 import type { CategoryId, Expense } from '../types'
 
 interface ChartSegment {
@@ -22,11 +22,9 @@ interface ChartDay {
 const emit = defineEmits<{ edit: [expense: Expense] }>()
 const expenseStore = useExpenseStore()
 const settingsStore = useSettingsStore()
-const initialRange = getDefaultPeriodRange(settingsStore.periodStartDay, expenseStore.expenses)
-const defaultCycleStartKey = ref(initialRange.cycleStartKey)
-const startDateKey = ref(initialRange.cycleStartKey)
-const endDateKey = ref(initialRange.cycleEndKey)
-const isCustomRange = ref(false)
+const initialRange = getDefaultPeriodRange(settingsStore.periodStartDay)
+const pickerStartKey = ref(initialRange.cycleStartKey)
+const pickerEndKey = ref(initialRange.cycleEndKey)
 const selectedDayKey = ref<string>()
 
 const chartWidth = ref(360)
@@ -38,28 +36,35 @@ const chartLeft = 38
 const chartRight = 10
 const chartHeight = chartBottom - chartTop
 
-const rangeIsInvalid = computed(() => startDateKey.value > endDateKey.value)
-const effectiveStartKey = computed(() => rangeIsInvalid.value ? endDateKey.value : startDateKey.value)
-const effectiveEndKey = computed(() => endDateKey.value)
-const rangeDays = computed(() => countPeriodDays(effectiveStartKey.value, effectiveEndKey.value))
+const rangeIsInvalid = computed(() => pickerStartKey.value > pickerEndKey.value)
 const todayKey = toDateKey()
-const dataStartKey = computed(() => {
-  if (isCustomRange.value || rangeIsInvalid.value) return effectiveStartKey.value
-  return getPeriodRangeFromStart(defaultCycleStartKey.value, expenseStore.expenses).firstRecordKey ?? effectiveStartKey.value
+const statsStartKey = computed(() => {
+  if (rangeIsInvalid.value) return pickerStartKey.value
+
+  const firstRecordKey = expenseStore.expenses
+    .map((expense) => toDateKey(expense.timestamp))
+    .filter((key) => key >= pickerStartKey.value && key <= pickerEndKey.value)
+    .sort()[0]
+
+  return firstRecordKey ?? pickerStartKey.value
 })
-const dataEndKey = computed(() => effectiveEndKey.value < todayKey ? effectiveEndKey.value : todayKey)
-const averageEndKey = computed(() => dataEndKey.value >= todayKey ? dateKeyFromOffset(-1) : dataEndKey.value)
+const statsEndKey = computed(() => pickerEndKey.value < todayKey ? pickerEndKey.value : todayKey)
+const statsRangeIsInvalid = computed(() => statsStartKey.value > statsEndKey.value)
+const rangeDays = computed(() => statsRangeIsInvalid.value ? 0 : countPeriodDays(statsStartKey.value, statsEndKey.value))
+const averageEndKey = computed(() => statsEndKey.value >= todayKey ? dateKeyFromOffset(-1) : statsEndKey.value)
 const averageDays = computed(() => {
-  if (averageEndKey.value < dataStartKey.value) return 0
-  return countPeriodDays(dataStartKey.value, averageEndKey.value)
+  if (statsRangeIsInvalid.value || averageEndKey.value < statsStartKey.value) return 0
+  return countPeriodDays(statsStartKey.value, averageEndKey.value)
 })
 
 const chartDays = computed<ChartDay[]>(() => {
+  if (statsRangeIsInvalid.value) return []
+
   const result: ChartDay[] = []
-  const startTimestamp = dateKeyToDate(effectiveStartKey.value).getTime()
+  const startTimestamp = dateKeyToDate(statsStartKey.value).getTime()
   for (let index = 0; index < rangeDays.value; index += 1) {
     const key = dateKeyFromOffset(index, startTimestamp)
-    const dailyExpenses = expenseStore.expenses.filter((expense) => !expense.isOneOff && key >= dataStartKey.value && key <= dataEndKey.value && toDateKey(expense.timestamp) === key)
+    const dailyExpenses = expenseStore.expenses.filter((expense) => !expense.isOneOff && toDateKey(expense.timestamp) === key)
     const segments = categories
       .map((category) => ({
         categoryId: category.id,
@@ -74,8 +79,11 @@ const chartDays = computed<ChartDay[]>(() => {
 const maxDaily = computed(() => Math.max(1, ...chartDays.value.map((day) => day.total)))
 const periodTotal = computed(() => chartDays.value.reduce((sum, day) => sum + day.total, 0))
 const selectedDay = computed(() => chartDays.value.find((day) => day.key === selectedDayKey.value) ?? chartDays.value[chartDays.value.length - 1])
-const periodStartKey = dataStartKey
-const periodEndKey = dataEndKey
+const averageTotal = computed(() => chartDays.value
+  .filter((day) => day.key <= averageEndKey.value)
+  .reduce((sum, day) => sum + day.total, 0))
+const periodStartKey = statsStartKey
+const periodEndKey = statsEndKey
 
 const periodOneOffs = computed(() => expenseStore.expenses
   .filter((expense) => expense.isOneOff)
@@ -88,38 +96,37 @@ const oneOffTotal = computed(() => periodOneOffs.value.reduce((sum, expense) => 
 
 const categoryStats = computed(() => categories.map((category) => {
   const total = chartDays.value.reduce((sum, day) => sum + (day.segments.find((segment) => segment.categoryId === category.id)?.amount ?? 0), 0)
-  return { category, total, average: averageDays.value > 0 ? total / averageDays.value : 0 }
+  const averageTotal = chartDays.value
+    .filter((day) => day.key <= averageEndKey.value)
+    .reduce((sum, day) => sum + (day.segments.find((segment) => segment.categoryId === category.id)?.amount ?? 0), 0)
+  return { category, total, average: averageDays.value > 0 ? averageTotal / averageDays.value : 0 }
 }))
 
 function resetDefaultRange(): void {
-  const range = getDefaultPeriodRange(settingsStore.periodStartDay, expenseStore.expenses)
-  isCustomRange.value = false
-  defaultCycleStartKey.value = range.cycleStartKey
-  startDateKey.value = range.cycleStartKey
-  endDateKey.value = range.cycleEndKey
+  const range = getDefaultPeriodRange(settingsStore.periodStartDay)
+  pickerStartKey.value = range.cycleStartKey
+  pickerEndKey.value = range.cycleEndKey
   selectedDayKey.value = undefined
 }
 
-function markCustomRange(): void {
-  isCustomRange.value = true
-  selectedDayKey.value = undefined
+function changePickerRange(endpoint: 'start' | 'end'): void {
+  if (!pickerStartKey.value || !pickerEndKey.value || isPeriodRangeValid(pickerStartKey.value, pickerEndKey.value)) return
+
+  if (endpoint === 'start') {
+    pickerEndKey.value = getMaxPeriodEnd(pickerStartKey.value)
+  } else {
+    pickerStartKey.value = getMinPeriodStart(pickerEndKey.value)
+  }
 }
 
 function shiftCycle(direction: -1 | 1): void {
-  const currentStart = dateKeyToDate(startDateKey.value)
-  currentStart.setMonth(currentStart.getMonth() + direction)
-  const range = getPeriodRangeFromStart(toDateKey(currentStart.getTime()), expenseStore.expenses)
-  isCustomRange.value = false
-  defaultCycleStartKey.value = range.cycleStartKey
-  startDateKey.value = range.cycleStartKey
-  endDateKey.value = range.cycleEndKey
+  pickerStartKey.value = shiftPeriodEndpoint(pickerStartKey.value, direction, 'start')
+  pickerEndKey.value = shiftPeriodEndpoint(pickerEndKey.value, direction, 'end')
   selectedDayKey.value = undefined
 }
 
-watch([startDateKey, endDateKey], () => { selectedDayKey.value = undefined })
-watch([() => settingsStore.periodStartDay, () => expenseStore.expenses.length], () => {
-  if (!isCustomRange.value) resetDefaultRange()
-})
+watch([pickerStartKey, pickerEndKey], () => { selectedDayKey.value = undefined })
+watch(() => settingsStore.periodStartDay, resetDefaultRange)
 
 onMounted(() => {
   if (!chartWrap.value) return
@@ -176,11 +183,11 @@ function chartTick(ratio: number): string {
   <div>
       <div class="stats-date-range" aria-label="统计时间范围">
       <label class="range-field">
-        <input v-model="startDateKey" type="date" aria-label="开始日期" @change="markCustomRange" />
+        <input v-model="pickerStartKey" type="date" aria-label="开始日期" @change="changePickerRange('start')" />
       </label>
       <span class="range-separator">至</span>
       <label class="range-field">
-        <input v-model="endDateKey" type="date" aria-label="结束日期" @change="markCustomRange" />
+        <input v-model="pickerEndKey" type="date" aria-label="结束日期" @change="changePickerRange('end')" />
       </label>
     </div>
     <p v-if="rangeIsInvalid" class="range-error">结束日期需要晚于开始日期</p>
@@ -256,7 +263,7 @@ function chartTick(ratio: number): string {
       <div class="average-hero">
         <div>
           <div class="average-label">平均每日生活成本</div>
-          <div class="average-value">{{ formatMoney(averageDays > 0 ? Math.round(periodTotal / averageDays) : 0, true) }}<span class="average-unit">/ 天</span></div>
+          <div class="average-value">{{ formatMoney(averageDays > 0 ? Math.round(averageTotal / averageDays) : 0, true) }}<span class="average-unit">/ 天</span></div>
         </div>
         <div class="summary-caption">按 {{ averageDays }} 个自然日计算<br />不含一次性支出</div>
       </div>
