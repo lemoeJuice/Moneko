@@ -1,5 +1,5 @@
-const dateFormatter = new Intl.DateTimeFormat('zh-CN', { month: 'long', day: 'numeric', weekday: 'short' })
 const shortDateFormatter = new Intl.DateTimeFormat('zh-CN', { month: 'numeric', day: 'numeric' })
+const weekdayFormatter = new Intl.DateTimeFormat('zh-CN', { weekday: 'short' })
 
 function pad(value: number): string {
   return String(value).padStart(2, '0')
@@ -22,7 +22,8 @@ export function dateKeyFromOffset(offset: number, endTimestamp = Date.now()): st
 }
 
 export function formatDateHeading(dateKey: string): string {
-  return dateFormatter.format(dateKeyToDate(dateKey)).replace('星期', ' · 星期')
+  const date = dateKeyToDate(dateKey)
+  return `${date.getMonth() + 1}月${date.getDate()}日 · ${weekdayFormatter.format(date)}`
 }
 
 export function formatShortDate(dateKey: string): string {
