@@ -1,13 +1,16 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useExpenseStore } from '../stores/expenseStore'
+import { useSettingsStore } from '../stores/settingsStore'
 import { createBackup, createCsv, parseBackup } from '../utils/backup'
 
 const expenseStore = useExpenseStore()
+const settingsStore = useSettingsStore()
 const fileInput = ref<HTMLInputElement>()
 const statusMessage = ref('')
 const isError = ref(false)
 const updateMessage = ref('')
+const periodStartDays = Array.from({ length: 28 }, (_, index) => index + 1)
 
 function download(content: BlobPart, filename: string, type: string): void {
   const url = URL.createObjectURL(new Blob([content], { type }))
@@ -66,6 +69,11 @@ function checkForUpdates(): void {
     updateMessage.value = ''
   }, 3500)
 }
+
+function changePeriodStartDay(event: Event): void {
+  const target = event.target as HTMLSelectElement
+  settingsStore.setPeriodStartDay(Number(target.value))
+}
 </script>
 
 <template>
@@ -97,6 +105,23 @@ function checkForUpdates(): void {
         </div>
         <div class="setting-actions">
           <button class="secondary-button" type="button" @click="exportCsv">导出全部记录</button>
+        </div>
+      </section>
+
+      <section class="card setting-card">
+        <div class="setting-card-header">
+          <span class="setting-icon" aria-hidden="true">📅</span>
+          <div class="setting-copy">
+            <h2 class="setting-title">统计周期</h2>
+            <p class="setting-description">默认按每月设定日期开始，并自动从本周期第一笔记录开始计算。</p>
+          </div>
+        </div>
+        <div class="period-control">
+          <span>每月</span>
+          <select :value="settingsStore.periodStartDay" aria-label="统计周期开始日期" @change="changePeriodStartDay">
+            <option v-for="day in periodStartDays" :key="day" :value="day">{{ day }} 日</option>
+          </select>
+          <span>开始</span>
         </div>
       </section>
 

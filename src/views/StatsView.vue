@@ -2,8 +2,10 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { categories, getCategory } from '../constants/categories'
 import { useExpenseStore } from '../stores/expenseStore'
+import { useSettingsStore } from '../stores/settingsStore'
 import { formatMoney } from '../utils/currency'
 import { dateKeyFromOffset, dateKeyToDate, formatDateHeading, formatShortDate, toDateKey } from '../utils/date'
+import { countPeriodDays, getDefaultPeriodRange } from '../utils/period'
 import type { CategoryId, Expense } from '../types'
 
 interface ChartSegment {
@@ -19,10 +21,11 @@ interface ChartDay {
 
 const emit = defineEmits<{ edit: [expense: Expense] }>()
 const expenseStore = useExpenseStore()
-const todayKey = toDateKey()
-const currentMonthStart = `${todayKey.slice(0, 8)}01`
-const startDateKey = ref(currentMonthStart)
-const endDateKey = ref(todayKey)
+const settingsStore = useSettingsStore()
+const initialRange = getDefaultPeriodRange(settingsStore.periodStartDay, expenseStore.expenses)
+const startDateKey = ref(initialRange.startKey)
+const endDateKey = ref(initialRange.endKey)
+const isCustomRange = ref(false)
 const selectedDayKey = ref<string>()
 
 const chartWidth = ref(360)
@@ -37,11 +40,7 @@ const chartHeight = chartBottom - chartTop
 const rangeIsInvalid = computed(() => startDateKey.value > endDateKey.value)
 const effectiveStartKey = computed(() => rangeIsInvalid.value ? endDateKey.value : startDateKey.value)
 const effectiveEndKey = computed(() => endDateKey.value)
-const rangeDays = computed(() => {
-  const start = dateKeyToDate(effectiveStartKey.value).getTime()
-  const end = dateKeyToDate(effectiveEndKey.value).getTime()
-  return Math.max(1, Math.round((end - start) / 86400000) + 1)
-})
+const rangeDays = computed(() => countPeriodDays(effectiveStartKey.value, effectiveEndKey.value))
 
 const chartDays = computed<ChartDay[]>(() => {
   const result: ChartDay[] = []
@@ -80,7 +79,23 @@ const categoryStats = computed(() => categories.map((category) => {
   return { category, total, average: total / rangeDays.value }
 }))
 
+function resetDefaultRange(): void {
+  const range = getDefaultPeriodRange(settingsStore.periodStartDay, expenseStore.expenses)
+  isCustomRange.value = false
+  startDateKey.value = range.startKey
+  endDateKey.value = range.endKey
+  selectedDayKey.value = undefined
+}
+
+function markCustomRange(): void {
+  isCustomRange.value = true
+  selectedDayKey.value = undefined
+}
+
 watch([startDateKey, endDateKey], () => { selectedDayKey.value = undefined })
+watch([() => settingsStore.periodStartDay, () => expenseStore.expenses.length], () => {
+  if (!isCustomRange.value) resetDefaultRange()
+})
 
 onMounted(() => {
   if (!chartWrap.value) return
@@ -137,11 +152,11 @@ function chartTick(ratio: number): string {
   <div>
     <div class="stats-date-range" aria-label="统计时间范围">
       <label class="range-field">
-        <input v-model="startDateKey" type="date" aria-label="开始日期" />
+        <input v-model="startDateKey" type="date" aria-label="开始日期" @change="markCustomRange" />
       </label>
       <span class="range-separator">至</span>
       <label class="range-field">
-        <input v-model="endDateKey" type="date" aria-label="结束日期" />
+        <input v-model="endDateKey" type="date" aria-label="结束日期" @change="markCustomRange" />
       </label>
     </div>
     <p v-if="rangeIsInvalid" class="range-error">结束日期需要晚于开始日期</p>
@@ -239,7 +254,7 @@ function chartTick(ratio: number): string {
         <span class="one-off-date">{{ formatShortDate(toDateKey(expense.timestamp)) }}</span>
         <span class="one-off-description">
           <strong>{{ getCategory(expense.categoryId).icon }} {{ getCategory(expense.categoryId).label }}</strong>
-          <span>{{ expense.note || '无备注' }}</span>
+          <span v-if="expense.note">{{ expense.note }}</span>
         </span>
         <span class="one-off-amount">{{ formatMoney(expense.amount) }}</span>
       </button>
