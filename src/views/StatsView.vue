@@ -3,7 +3,7 @@ import { computed, ref, watch } from 'vue'
 import { categories, getCategory } from '../constants/categories'
 import { useExpenseStore } from '../stores/expenseStore'
 import { formatMoney } from '../utils/currency'
-import { dateKeyFromOffset, formatDateHeading, formatShortDate, toDateKey } from '../utils/date'
+import { dateKeyFromOffset, dateKeyToDate, formatDateHeading, formatShortDate, toDateKey } from '../utils/date'
 import type { CategoryId, Expense } from '../types'
 
 interface ChartSegment {
@@ -19,9 +19,11 @@ interface ChartDay {
 
 const emit = defineEmits<{ edit: [expense: Expense] }>()
 const expenseStore = useExpenseStore()
-const rangeDays = ref<7 | 30 | 90>(30)
+const todayKey = toDateKey()
+const currentMonthStart = `${todayKey.slice(0, 8)}01`
+const startDateKey = ref(currentMonthStart)
+const endDateKey = ref(todayKey)
 const selectedDayKey = ref<string>()
-const rangeOptions = [7, 30, 90] as const
 
 const chartWidth = 720
 const chartTop = 19
@@ -30,10 +32,20 @@ const chartLeft = 38
 const chartRight = 10
 const chartHeight = chartBottom - chartTop
 
+const rangeIsInvalid = computed(() => startDateKey.value > endDateKey.value)
+const effectiveStartKey = computed(() => rangeIsInvalid.value ? endDateKey.value : startDateKey.value)
+const effectiveEndKey = computed(() => endDateKey.value)
+const rangeDays = computed(() => {
+  const start = dateKeyToDate(effectiveStartKey.value).getTime()
+  const end = dateKeyToDate(effectiveEndKey.value).getTime()
+  return Math.max(1, Math.round((end - start) / 86400000) + 1)
+})
+
 const chartDays = computed<ChartDay[]>(() => {
   const result: ChartDay[] = []
-  for (let index = rangeDays.value - 1; index >= 0; index -= 1) {
-    const key = dateKeyFromOffset(-index)
+  const startTimestamp = dateKeyToDate(effectiveStartKey.value).getTime()
+  for (let index = 0; index < rangeDays.value; index += 1) {
+    const key = dateKeyFromOffset(index, startTimestamp)
     const dailyExpenses = expenseStore.expenses.filter((expense) => !expense.isOneOff && toDateKey(expense.timestamp) === key)
     const segments = categories
       .map((category) => ({
@@ -49,8 +61,8 @@ const chartDays = computed<ChartDay[]>(() => {
 const maxDaily = computed(() => Math.max(1, ...chartDays.value.map((day) => day.total)))
 const periodTotal = computed(() => chartDays.value.reduce((sum, day) => sum + day.total, 0))
 const selectedDay = computed(() => chartDays.value.find((day) => day.key === selectedDayKey.value) ?? chartDays.value[chartDays.value.length - 1])
-const periodStartKey = computed(() => chartDays.value[0]?.key ?? dateKeyFromOffset(-rangeDays.value + 1))
-const periodEndKey = computed(() => chartDays.value[chartDays.value.length - 1]?.key ?? toDateKey())
+const periodStartKey = effectiveStartKey
+const periodEndKey = effectiveEndKey
 
 const periodOneOffs = computed(() => expenseStore.expenses
   .filter((expense) => expense.isOneOff)
@@ -66,7 +78,7 @@ const categoryStats = computed(() => categories.map((category) => {
   return { category, total, average: total / rangeDays.value }
 }))
 
-watch(rangeDays, () => { selectedDayKey.value = undefined })
+watch([startDateKey, endDateKey], () => { selectedDayKey.value = undefined })
 
 function barSlot(): number {
   return (chartWidth - chartLeft - chartRight) / rangeDays.value
@@ -97,9 +109,9 @@ function segmentHeight(segment: ChartSegment): number {
 }
 
 function shouldShowDateLabel(index: number): boolean {
-  if (rangeDays.value === 7) return true
-  if (rangeDays.value === 30) return index % 5 === 0 || index === rangeDays.value - 1
-  return index % 15 === 0 || index === rangeDays.value - 1
+  if (rangeDays.value <= 10) return true
+  const interval = rangeDays.value <= 31 ? 5 : Math.ceil(rangeDays.value / 6)
+  return index % interval === 0 || index === rangeDays.value - 1
 }
 
 function chartTick(ratio: number): string {
@@ -110,11 +122,18 @@ function chartTick(ratio: number): string {
 
 <template>
   <div>
-    <div class="stats-toolbar" role="tablist" aria-label="统计时间范围">
-      <button v-for="days in rangeOptions" :key="days" class="range-button" :class="{ active: rangeDays === days }" type="button" @click="rangeDays = days">
-        最近 {{ days }} 天
-      </button>
+    <div class="stats-date-range" aria-label="统计时间范围">
+      <label class="range-field">
+        <span>从</span>
+        <input v-model="startDateKey" type="date" />
+      </label>
+      <span class="range-separator">至</span>
+      <label class="range-field">
+        <span>到</span>
+        <input v-model="endDateKey" type="date" />
+      </label>
     </div>
+    <p v-if="rangeIsInvalid" class="range-error">结束日期需要晚于开始日期</p>
 
     <section class="card chart-card">
       <div class="chart-heading">

@@ -5,7 +5,7 @@ defineProps<{ modelValue: AppView }>()
 const emit = defineEmits<{ 'update:modelValue': [value: AppView] }>()
 
 const items: Array<{ id: AppView; label: string; icon: string }> = [
-  { id: 'home', label: '今天', icon: '☀️' },
+  { id: 'home', label: '记录', icon: '📝' },
   { id: 'stats', label: '统计', icon: '📊' },
   { id: 'settings', label: '设置', icon: '⚙️' }
 ]

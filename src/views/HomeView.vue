@@ -11,6 +11,7 @@ const emit = defineEmits<{ edit: [expense: Expense] }>()
 const expenseStore = useExpenseStore()
 const selectedDate = ref(toDateKey())
 const toastVisible = ref(false)
+const showQuickEntry = ref(false)
 let toastTimer: number | undefined
 
 const dayExpenses = computed(() => expenseStore.expenses.filter((expense) => toDateKey(expense.timestamp) === selectedDate.value))
@@ -30,6 +31,11 @@ function showToast(): void {
   toastTimer = window.setTimeout(() => { toastVisible.value = false }, 4200)
 }
 
+function handleAdded(): void {
+  showQuickEntry.value = false
+  showToast()
+}
+
 async function undo(): Promise<void> {
   await expenseStore.undoLastAdded()
   toastVisible.value = false
@@ -42,6 +48,8 @@ onBeforeUnmount(() => {
 
 <template>
   <div>
+    <h1 class="page-heading home-heading">记录</h1>
+
     <div class="date-nav">
       <div class="date-nav-main">
         <label class="date-picker-label">
@@ -67,8 +75,6 @@ onBeforeUnmount(() => {
       </p>
     </section>
 
-    <QuickEntry :selected-date="selectedDate" @added="showToast" />
-
     <section class="section-block">
       <div class="section-header">
         <div>
@@ -86,10 +92,27 @@ onBeforeUnmount(() => {
         <button type="button" @click="undo">撤销</button>
       </div>
     </Transition>
+
+    <button class="floating-add" type="button" aria-label="新增支出" @click="showQuickEntry = true">
+      <span aria-hidden="true">+</span>
+    </button>
+
+    <Teleport to="body">
+      <div v-if="showQuickEntry" class="modal-backdrop" @click.self="showQuickEntry = false">
+        <section class="modal entry-modal" role="dialog" aria-modal="true" aria-labelledby="new-entry-title">
+          <div class="modal-header">
+            <h2 id="new-entry-title" class="modal-title">新记录</h2>
+            <button class="icon-button" type="button" aria-label="关闭" @click="showQuickEntry = false">×</button>
+          </div>
+          <QuickEntry :selected-date="selectedDate" @added="handleAdded" />
+        </section>
+      </div>
+    </Teleport>
   </div>
 </template>
 
 <style scoped>
+.home-heading { padding-top: 6px; }
 .date-picker-label { position: relative; display: inline-flex; align-items: center; gap: 0; cursor: pointer; }
 .date-picker-label::after { content: '⌄'; margin-left: 6px; color: var(--faint); font-size: 15px; }
 .date-picker-input { position: absolute; inset: 0; width: 100%; cursor: pointer; opacity: 0; }
@@ -103,4 +126,5 @@ onBeforeUnmount(() => {
 .toast-enter-active, .toast-leave-active { transition: transform .2s ease, opacity .2s ease; }
 .toast-enter-from, .toast-leave-to { transform: translateY(12px); opacity: 0; }
 .validation-message { margin: 9px 3px 0; color: var(--danger); font-size: 11px; }
+.entry-modal :deep(.quick-card) { padding: 0; border: 0; box-shadow: none; }
 </style>

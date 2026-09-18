@@ -160,14 +160,16 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
 .nav-button.active { background: #e6f4ff; color: var(--blue-deep); }
 .nav-icon { font-size: 21px; line-height: 1; }
 
-.stats-toolbar { display: flex; gap: 7px; margin: 20px 0 15px; }
-.range-button { flex: 1; min-height: 39px; border: 1px solid var(--line); border-radius: 12px; background: #fff; color: var(--muted); font-size: 12px; font-weight: 750; }
-.range-button.active { border-color: #9dccE9; background: var(--blue-soft); color: var(--blue-deep); }
+.stats-date-range { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: end; gap: 8px; margin: 20px 0 15px; }
+.range-field { display: grid; gap: 5px; color: var(--muted); font-size: 11px; font-weight: 750; }
+.range-field input { width: 100%; min-height: 39px; padding: 0 9px; border: 1px solid var(--line); border-radius: 12px; background: #fff; color: var(--ink); font-size: 12px; }
+.range-separator { padding-bottom: 12px; color: var(--faint); font-size: 12px; }
+.range-error { margin: -7px 0 12px; color: var(--danger); font-size: 11px; }
 .chart-card { padding: 17px 12px 13px; }
 .chart-heading { display: flex; align-items: start; justify-content: space-between; gap: 8px; padding: 0 4px 12px; }
 .chart-total { color: var(--blue-deep); font-size: 15px; font-weight: 800; }
-.chart-wrap { overflow-x: auto; margin: 0 -2px; }
-.chart-svg { display: block; width: 100%; min-width: 620px; height: 240px; overflow: visible; }
+.chart-wrap { overflow: hidden; margin: 0 -2px; }
+.chart-svg { display: block; width: 100%; height: 240px; overflow: visible; }
 .chart-grid-line { stroke: #eaf1f6; stroke-width: 1; }
 .chart-axis-label, .chart-date-label { fill: #9aafbd; font-size: 10px; }
 .chart-date-label { font-size: 9px; }
@@ -222,6 +224,10 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
 .toast { position: fixed; z-index: 20; right: 16px; bottom: calc(87px + env(safe-area-inset-bottom)); left: 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; width: min(calc(100% - 32px), 420px); margin: auto; padding: 12px 14px; border: 1px solid #cfe5f3; border-radius: 15px; background: #fff; box-shadow: 0 10px 30px rgba(54, 94, 120, .15); color: var(--ink); font-size: 12px; font-weight: 700; }
 .toast button { padding: 5px 8px; border: 0; border-radius: 8px; background: var(--blue-soft); color: var(--blue-deep); font-size: 12px; font-weight: 800; }
 
+.floating-add { position: fixed; z-index: 9; right: max(20px, calc((100vw - 760px) / 2 + 16px)); bottom: calc(84px + env(safe-area-inset-bottom)); display: grid; width: 58px; height: 58px; place-items: center; border: 0; border-radius: 20px; background: var(--blue); box-shadow: 0 12px 26px rgba(52, 123, 173, .28); color: #fff; font-size: 35px; font-weight: 300; line-height: 1; transition: transform .16s ease, background .16s ease; }
+.floating-add:hover { background: var(--blue-deep); transform: translateY(-2px); }
+.floating-add:active { transform: scale(.95); }
+
 .modal-backdrop { position: fixed; z-index: 30; inset: 0; display: grid; align-items: end; padding: 16px; background: rgba(42, 67, 83, .25); }
 .modal { width: min(100%, 520px); max-height: calc(100vh - 32px); margin: auto; overflow: auto; padding: 20px 16px max(20px, env(safe-area-inset-bottom)); border-radius: 25px; background: #fff; box-shadow: 0 20px 60px rgba(31, 65, 89, .22); }
 .modal-header { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 17px; }
@@ -250,5 +256,6 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
   .nav-button { display: flex; gap: 6px; min-height: 38px; padding: 0 11px; }
   .nav-icon { font-size: 16px; }
   .app-content { padding-top: 0; }
+  .floating-add { bottom: 28px; }
   .modal-backdrop { align-items: center; }
 }
