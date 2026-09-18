@@ -48,8 +48,6 @@ onBeforeUnmount(() => {
 
 <template>
   <div>
-    <h1 class="page-heading home-heading">记录</h1>
-
     <div class="date-nav">
       <div class="date-nav-main">
         <label class="date-picker-label">
@@ -112,7 +110,6 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
-.home-heading { padding-top: 6px; }
 .date-picker-label { position: relative; display: inline-flex; align-items: center; gap: 0; cursor: pointer; }
 .date-picker-label::after { content: '⌄'; margin-left: 6px; color: var(--faint); font-size: 15px; }
 .date-picker-input { position: absolute; inset: 0; width: 100%; cursor: pointer; opacity: 0; }
