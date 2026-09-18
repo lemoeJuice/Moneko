@@ -262,11 +262,13 @@ function chartTick(ratio: number): string {
       </div>
       <div class="summary-table">
         <div class="summary-row header"><span>分类</span><span class="summary-amount">日均</span><span class="summary-amount">周期累计</span></div>
-        <div v-for="stat in categoryStats" :key="stat.category.id" class="summary-row">
-          <span class="summary-category"><i class="color-dot" :style="{ backgroundColor: stat.category.color }"></i>{{ stat.category.icon }} {{ stat.category.label }}</span>
-          <span class="summary-amount">{{ formatMoney(Math.round(stat.average)) }}</span>
-          <span class="summary-amount">{{ formatMoney(stat.total) }}</span>
-        </div>
+        <template v-for="stat in categoryStats" :key="stat.category.id">
+          <div v-if="stat.total > 0" class="summary-row">
+            <span class="summary-category"><i class="color-dot" :style="{ backgroundColor: stat.category.color }"></i>{{ stat.category.icon }} {{ stat.category.label }}</span>
+            <span class="summary-amount">{{ formatMoney(Math.round(stat.average)) }}</span>
+            <span class="summary-amount">{{ formatMoney(stat.total) }}</span>
+          </div>
+        </template>
       </div>
     </section>
 

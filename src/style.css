@@ -191,7 +191,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
 .chart-total, .chart-metric strong { color: var(--blue-deep); font-size: 15px; font-weight: 800; }
 .one-off-metric .chart-metric-label { color: var(--ink); }
 .one-off-metric strong { color: #a37a31; }
-.period-cycle-actions { display: inline-flex; gap: 4px; margin-left: 2px; }
+.period-cycle-actions { display: inline-flex; gap: 4px; margin-left: auto; }
 .period-cycle-actions .icon-button { width: 30px; height: 30px; border-radius: 9px; font-size: 17px; }
 .chart-wrap { overflow: hidden; margin: 0 -2px; }
 .chart-svg { display: block; width: 100%; height: 260px; overflow: visible; }
