@@ -94,7 +94,7 @@ export function getDefaultPeriodRange(startDay: number, timestamp = Date.now()):
     cycleStart = new Date(now.getFullYear(), now.getMonth() - 1, safeStartDay)
   }
 
-  return getPeriodRangeFromStart(toDateKey(cycleStart.getTime()))
+  return getPeriodRangeFromStart(dateKeyAtNoon(cycleStart))
 }
 
 export function countPeriodDays(startKey: string, endKey: string): number {
