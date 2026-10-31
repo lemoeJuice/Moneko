@@ -67,3 +67,7 @@ Workflow 会执行 `npm ci`、`npm run build`，然后发布 `dist`。Vite 会�
 - 业务数据通过 `src/data/expenseRepository.ts` 访问 IndexedDB，业务组件不直接操作数据库。
 - 货币与日期逻辑集中在 `src/utils/`。
 - 默认部署 workflow 位于 `.github/workflows/deploy.yml`。
+
+## 许可证
+
+本项目采用 GNU General Public License v3.0 only（GPL-3.0-only）。完整许可文本见 [LICENSE](./LICENSE)。
