@@ -2,6 +2,7 @@
 import { computed, onBeforeUnmount, ref } from 'vue'
 import QuickEntry from '../components/QuickEntry.vue'
 import ExpenseList from '../components/ExpenseList.vue'
+import UiIcon from '../components/UiIcon.vue'
 import { useExpenseStore } from '../stores/expenseStore'
 import { formatDateHeading, isToday, toDateKey } from '../utils/date'
 import { formatMoney } from '../utils/currency'
@@ -60,13 +61,20 @@ onBeforeUnmount(() => {
       <div class="date-nav-main">
         <label class="date-picker-label">
           <span class="date-nav-title">{{ formatDateHeading(selectedDate) }}</span>
+          <span class="date-nav-chevron">
+            <UiIcon name="chevron-down" :size="14" :stroke-width="2.2" />
+          </span>
           <input v-model="selectedDate" class="date-picker-input" type="date" aria-label="选择查看日期" />
         </label>
         <span v-if="isToday(selectedDate)" class="today-pill">今天</span>
       </div>
       <div class="date-nav-actions">
-        <button class="icon-button" type="button" aria-label="前一天" @click="moveDate(-1)">‹</button>
-        <button class="icon-button" type="button" aria-label="后一天" @click="moveDate(1)">›</button>
+        <button class="icon-button" type="button" aria-label="前一天" @click="moveDate(-1)">
+          <UiIcon name="chevron-left" :size="16" :stroke-width="2.3" />
+        </button>
+        <button class="icon-button" type="button" aria-label="后一天" @click="moveDate(1)">
+          <UiIcon name="chevron-right" :size="16" :stroke-width="2.3" />
+        </button>
       </div>
     </div>
 
@@ -75,10 +83,14 @@ onBeforeUnmount(() => {
         <p class="day-summary-label">{{ isToday(selectedDate) ? '今天' : '这一天' }}共支出</p>
         <p class="day-summary-total">{{ formatMoney(dayTotal, true) }}</p>
       </div>
-      <p class="day-summary-split">
-        <span>日常 <strong>{{ formatMoney(regularTotal) }}</strong></span>
-        <span>一次性 <strong class="one-off-text">{{ formatMoney(oneOffTotal) }}</strong></span>
-      </p>
+      <div class="day-summary-split">
+        <span class="summary-chip regular-chip">
+          日常 <strong>{{ formatMoney(regularTotal) }}</strong>
+        </span>
+        <span class="summary-chip one-off-chip">
+          一次性 <strong>{{ formatMoney(oneOffTotal) }}</strong>
+        </span>
+      </div>
     </section>
 
     <section class="section-block">
@@ -101,14 +113,16 @@ onBeforeUnmount(() => {
       </Transition>
 
       <button v-if="isActive" class="floating-add" type="button" aria-label="新增支出" @click="showQuickEntry = true">
-        <span aria-hidden="true">+</span>
+        <UiIcon name="plus" :size="24" :stroke-width="2.4" />
       </button>
 
       <div v-if="showQuickEntry && isActive" class="modal-backdrop" @click.self="closeQuickEntry">
         <section class="modal entry-modal" role="dialog" aria-modal="true" aria-labelledby="new-entry-title">
           <div class="modal-header">
             <h2 id="new-entry-title" class="modal-title">新记录</h2>
-            <button class="icon-button" type="button" aria-label="关闭" @click="closeQuickEntry">×</button>
+            <button class="icon-button" type="button" aria-label="关闭" @click="closeQuickEntry">
+              <UiIcon name="close" :size="17" :stroke-width="2.2" />
+            </button>
           </div>
           <QuickEntry :selected-date="selectedDate" @added="handleAdded" />
         </section>
@@ -118,18 +132,19 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
-.date-picker-label { position: relative; display: inline-flex; align-items: center; gap: 0; cursor: pointer; }
-.date-picker-label::after { content: '⌄'; margin-left: 6px; color: var(--faint); font-size: 15px; }
+.date-picker-label { position: relative; display: inline-flex; align-items: center; gap: 4px; cursor: pointer; }
+.date-nav-chevron { display: inline-flex; align-items: center; color: var(--faint); margin-top: 1px; }
 .date-picker-input { position: absolute; inset: 0; width: 100%; cursor: pointer; opacity: 0; }
-.day-summary { display: flex; align-items: end; justify-content: space-between; gap: 16px; padding: 7px 2px 21px; }
+.day-summary { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; padding: 7px 2px 21px; }
 .day-summary-main { min-width: 0; }
 .day-summary-label { margin: 0 0 3px; color: var(--muted); font-size: 12px; font-weight: 700; }
-.day-summary-total { margin: 0; color: var(--ink); font-size: 34px; font-weight: 850; letter-spacing: -.07em; }
-.day-summary-split { display: grid; flex: 0 0 auto; gap: 4px; margin: 0 0 4px; color: var(--muted); font-size: 11px; line-height: 1.25; text-align: right; }
-.day-summary-split strong { color: var(--blue-deep); }
-.day-summary-split .one-off-text { color: #a37a31; }
-.toast-enter-active, .toast-leave-active { transition: transform .2s ease, opacity .2s ease; }
-.toast-enter-from, .toast-leave-to { transform: translateY(12px); opacity: 0; }
+.day-summary-total { margin: 0; color: var(--ink); font-size: 34px; font-weight: 850; letter-spacing: -.07em; line-height: 1.1; }
+.day-summary-split { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; margin-bottom: 2px; }
+.summary-chip { display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px; border-radius: 8px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+.summary-chip.regular-chip { background: var(--blue-soft); color: var(--blue-deep); }
+.summary-chip.one-off-chip { background: #fff8eb; color: #a37a31; }
+.toast-enter-active, .toast-leave-active { transition: transform .22s cubic-bezier(0.16, 1, 0.3, 1), opacity .22s ease; }
+.toast-enter-from, .toast-leave-to { transform: translateY(14px); opacity: 0; }
 .validation-message { margin: 9px 3px 0; color: var(--danger); font-size: 11px; }
-.entry-modal :deep(.quick-card) { padding: 0; border: 0; box-shadow: none; }
+.entry-modal :deep(.quick-card) { padding: 0; border: 0; box-shadow: none; background: transparent; }
 </style>

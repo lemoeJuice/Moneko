@@ -5,6 +5,7 @@ import { useExpenseStore } from '../stores/expenseStore'
 import { formatDateTimeInput, timestampFromDateTimeInput } from '../utils/date'
 import { parseAmountInput } from '../utils/currency'
 import { forceResetViewport } from '../utils/viewport'
+import UiIcon, { type IconName } from './UiIcon.vue'
 import type { Expense } from '../types'
 
 const props = defineProps<{ expense: Expense }>()
@@ -53,16 +54,21 @@ async function remove(): Promise<void> {
       <section class="modal" role="dialog" aria-modal="true" aria-labelledby="editor-title">
         <div class="modal-header">
           <h2 id="editor-title" class="modal-title">编辑这笔记录</h2>
-          <button class="icon-button" type="button" aria-label="关闭" @click="closeModal">×</button>
+          <button class="icon-button" type="button" aria-label="关闭" @click="closeModal">
+            <UiIcon name="close" :size="17" :stroke-width="2.2" />
+          </button>
         </div>
 
         <div class="form-field">
           <label class="form-label" for="edit-amount">金额</label>
           <div class="edit-amount-row">
             <input id="edit-amount" v-model="amount" class="form-input" inputmode="decimal" />
-            <label class="one-off-toggle edit-one-off-toggle">
-              <input v-model="isOneOff" type="checkbox" />
-              <span>一次性</span>
+            <label class="one-off-pill-toggle edit-one-off-toggle" :class="{ active: isOneOff }">
+              <input v-model="isOneOff" type="checkbox" class="sr-only" />
+              <span class="pill-dot" aria-hidden="true">
+                <UiIcon v-if="isOneOff" name="check" :size="10" :stroke-width="3" />
+              </span>
+              <span class="pill-label">一次性</span>
             </label>
           </div>
         </div>
@@ -75,10 +81,15 @@ async function remove(): Promise<void> {
               :key="category.id"
               class="modal-category-button"
               :class="{ selected: categoryId === category.id }"
+              :style="{
+                '--cat-accent': category.color,
+                '--cat-soft': category.softColor
+              }"
               type="button"
               @click="categoryId = category.id"
             >
-              {{ category.icon }} {{ category.label }}
+              <UiIcon :name="category.icon as IconName" :size="15" :stroke-width="2" />
+              <span>{{ category.label }}</span>
             </button>
           </div>
         </div>
@@ -98,17 +109,10 @@ async function remove(): Promise<void> {
           <button class="danger-button" type="button" @click="remove">删除</button>
           <div class="modal-actions-right">
             <button class="secondary-button" type="button" @click="closeModal">取消</button>
-            <button class="primary-button" type="button" @click="save">保存修改</button>
+            <button class="primary-button" type="button" @click="save">保存</button>
           </div>
         </div>
       </section>
     </div>
   </Teleport>
 </template>
-
-<style scoped>
-.edit-amount-row { display: flex; align-items: center; gap: 8px; }
-.edit-amount-row .form-input { min-width: 0; }
-.edit-one-off-toggle { flex: 0 0 auto; }
-.validation-message { margin: 8px 0 0; color: var(--danger); font-size: 11px; }
-</style>

@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import { getCategory } from '../constants/categories'
 import { formatMoney } from '../utils/currency'
 import { formatTime } from '../utils/date'
+import UiIcon, { type IconName } from './UiIcon.vue'
 import type { Expense } from '../types'
 
 defineProps<{ expenses: Expense[] }>()
@@ -19,7 +20,6 @@ function editExpense(event: MouseEvent, expense: Expense): void {
 function clearPressedExpense(): void {
   pressedExpenseId.value = null
 }
-
 </script>
 
 <template>
@@ -34,12 +34,19 @@ function clearPressedExpense(): void {
       @pointercancel="clearPressedExpense"
       @click="editExpense($event, expense)"
     >
-      <span class="expense-icon" :style="{ backgroundColor: getCategory(expense.categoryId).softColor }" aria-hidden="true">
-        {{ getCategory(expense.categoryId).icon }}
+      <span
+        class="expense-icon"
+        :style="{
+          backgroundColor: getCategory(expense.categoryId).softColor,
+          color: getCategory(expense.categoryId).color
+        }"
+        aria-hidden="true"
+      >
+        <UiIcon :name="getCategory(expense.categoryId).icon as IconName" :size="19" :stroke-width="2" />
       </span>
       <span class="expense-info">
         <span class="expense-main">
-          <span>{{ getCategory(expense.categoryId).label }}</span>
+          <span class="expense-label">{{ getCategory(expense.categoryId).label }}</span>
           <span v-if="expense.isOneOff" class="one-off-badge">一次性</span>
         </span>
         <span v-if="expense.note" class="expense-note">{{ expense.note }}</span>
@@ -49,7 +56,9 @@ function clearPressedExpense(): void {
     </button>
   </div>
   <div v-else class="card empty-state">
-    <div class="empty-emoji" aria-hidden="true">🌱</div>
+    <div class="empty-graphic" aria-hidden="true">
+      <UiIcon name="empty-sheet" :size="32" :stroke-width="1.6" />
+    </div>
     <p>这一天还没有记录，记下第一笔吧</p>
   </div>
 </template>

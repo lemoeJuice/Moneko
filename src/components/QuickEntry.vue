@@ -5,6 +5,7 @@ import { useExpenseStore } from '../stores/expenseStore'
 import { currencySymbol, parseAmountInput } from '../utils/currency'
 import { timeInputFromTimestamp, timestampFromBusinessDateTimeInput } from '../utils/date'
 import { forceResetViewport } from '../utils/viewport'
+import UiIcon, { type IconName } from './UiIcon.vue'
 import type { Expense } from '../types'
 
 const props = defineProps<{ selectedDate: string }>()
@@ -69,9 +70,12 @@ async function save(categoryId: Expense['categoryId']): Promise<void> {
           @input="validationMessage = ''"
         />
       </div>
-      <label class="one-off-toggle amount-one-off-toggle">
-        <input v-model="isOneOff" type="checkbox" />
-        <span>一次性</span>
+      <label class="one-off-pill-toggle" :class="{ active: isOneOff }">
+        <input v-model="isOneOff" type="checkbox" class="sr-only" />
+        <span class="pill-dot" aria-hidden="true">
+          <UiIcon v-if="isOneOff" name="check" :size="10" :stroke-width="3" />
+        </span>
+        <span class="pill-label">一次性</span>
       </label>
     </div>
     <p class="amount-hint">输入金额后，点一下分类就记好了</p>
@@ -82,10 +86,12 @@ async function save(categoryId: Expense['categoryId']): Promise<void> {
         :key="category.id"
         class="category-button"
         type="button"
-        :style="{ backgroundColor: category.softColor }"
+        :style="{ '--cat-accent': category.color, '--cat-soft': category.softColor }"
         @click="save(category.id)"
       >
-        <span class="category-icon" aria-hidden="true">{{ category.icon }}</span>
+        <span class="category-icon-plate" aria-hidden="true">
+          <UiIcon :name="category.icon as IconName" :size="21" :stroke-width="1.9" />
+        </span>
         <span class="category-label">{{ category.label }}</span>
       </button>
     </div>
@@ -96,7 +102,8 @@ async function save(categoryId: Expense['categoryId']): Promise<void> {
 
     <div class="schedule-row">
       <button class="schedule-toggle" type="button" @click="setScheduleVisibility">
-        {{ showSchedule ? '收起时间设置' : '调整日期 / 时间' }}
+        <span>{{ showSchedule ? '收起时间设置' : '调整日期 / 时间' }}</span>
+        <UiIcon :name="showSchedule ? 'close' : 'chevron-down'" :size="12" :stroke-width="2.2" />
       </button>
       <div v-if="showSchedule" class="schedule-controls">
         <input v-model="entryDate" class="compact-input" type="date" aria-label="支出日期" />

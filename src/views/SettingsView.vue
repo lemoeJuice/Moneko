@@ -4,6 +4,7 @@ import { useExpenseStore } from '../stores/expenseStore'
 import { useSettingsStore } from '../stores/settingsStore'
 import { createBackup, createCsv, parseBackup } from '../utils/backup'
 import { checkForUpdates as fetchLatestApp } from '../pwa'
+import UiIcon from '../components/UiIcon.vue'
 
 const expenseStore = useExpenseStore()
 const settingsStore = useSettingsStore()
@@ -96,7 +97,9 @@ function changePeriodStartDay(event: Event): void {
     <div class="settings-list">
       <section class="card setting-card">
         <div class="setting-card-header">
-          <span class="setting-icon" aria-hidden="true">💾</span>
+          <span class="setting-icon" aria-hidden="true">
+            <UiIcon name="disk" :size="18" :stroke-width="2" />
+          </span>
           <div class="setting-copy">
             <h2 class="setting-title">备份与恢复</h2>
             <p class="setting-description">JSON 备份包含版本信息和全部记录，可以在设备之间手动保存。</p>
@@ -112,7 +115,9 @@ function changePeriodStartDay(event: Event): void {
 
       <section class="card setting-card">
         <div class="setting-card-header">
-          <span class="setting-icon" aria-hidden="true">📄</span>
+          <span class="setting-icon" aria-hidden="true">
+            <UiIcon name="file-spreadsheet" :size="18" :stroke-width="2" />
+          </span>
           <div class="setting-copy">
             <h2 class="setting-title">导出 CSV</h2>
             <p class="setting-description">方便用 Numbers、Excel 或其他表格工具查看原始流水。</p>
@@ -125,7 +130,9 @@ function changePeriodStartDay(event: Event): void {
 
       <section class="card setting-card">
         <div class="setting-card-header">
-          <span class="setting-icon" aria-hidden="true">📅</span>
+          <span class="setting-icon" aria-hidden="true">
+            <UiIcon name="calendar" :size="18" :stroke-width="2" />
+          </span>
           <div class="setting-copy">
             <h2 class="setting-title">统计周期</h2>
             <p class="setting-description">默认按每月设定日期开始，并自动从本周期第一笔记录开始计算。</p>
@@ -142,7 +149,9 @@ function changePeriodStartDay(event: Event): void {
 
       <section class="card setting-card">
         <div class="setting-card-header">
-          <span class="setting-icon" aria-hidden="true">🌤️</span>
+          <span class="setting-icon" aria-hidden="true">
+            <UiIcon name="cloud-off" :size="18" :stroke-width="2" />
+          </span>
           <div class="setting-copy">
             <h2 class="setting-title">离线优先</h2>
             <p class="setting-description">页面 / 应用首次加载并缓存完成后，即使没有网络也能继续使用。记录保存在本机 IndexedDB。</p>
@@ -152,7 +161,9 @@ function changePeriodStartDay(event: Event): void {
 
       <section class="card setting-card account-note-card">
         <div class="setting-card-header">
-          <span class="setting-icon" aria-hidden="true">💡</span>
+          <span class="setting-icon" aria-hidden="true">
+            <UiIcon name="bulb" :size="18" :stroke-width="2" />
+          </span>
           <div class="setting-copy">
             <p class="account-note-title">提示</p>
             <p class="account-note-text">没有账号系统，也没有服务器。请定期导出 JSON 备份，避免清理浏览器数据时丢失记录。</p>
@@ -162,7 +173,9 @@ function changePeriodStartDay(event: Event): void {
 
       <section class="card setting-card version-card">
         <div class="setting-card-header">
-          <span class="setting-icon" aria-hidden="true">ⓘ</span>
+          <span class="setting-icon" aria-hidden="true">
+            <UiIcon name="info" :size="18" :stroke-width="2" />
+          </span>
           <div class="setting-copy">
             <h2 class="setting-title">版本</h2>
             <p class="setting-description">当前版本 v0.1</p>

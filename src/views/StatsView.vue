@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { categories, getCategory } from '../constants/categories'
+import UiIcon from '../components/UiIcon.vue'
 import { useExpenseStore } from '../stores/expenseStore'
 import { useSettingsStore } from '../stores/settingsStore'
 import { formatMoney } from '../utils/currency'
@@ -216,8 +217,12 @@ function chartTick(ratio: number): string {
               <strong>{{ formatMoney(oneOffTotal) }}</strong>
             </div>
             <span class="period-cycle-actions" aria-label="切换统计周期">
-              <button class="icon-button" type="button" aria-label="上一个周期" @click="shiftCycle(-1)">‹</button>
-              <button class="icon-button" type="button" aria-label="下一个周期" @click="shiftCycle(1)">›</button>
+              <button class="icon-button" type="button" aria-label="上一个周期" @click="shiftCycle(-1)">
+                <UiIcon name="chevron-left" :size="15" :stroke-width="2.3" />
+              </button>
+              <button class="icon-button" type="button" aria-label="下一个周期" @click="shiftCycle(1)">
+                <UiIcon name="chevron-right" :size="15" :stroke-width="2.3" />
+              </button>
             </span>
           </div>
           <p class="section-subtitle">按天、按分类堆叠</p>

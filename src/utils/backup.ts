@@ -66,7 +66,7 @@ export function createCsv(expenses: Expense[]): string {
     const date = new Date(expense.timestamp)
     const dateText = toDateKey(expense.timestamp)
     const timeText = `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`
-    return [dateText, timeText, `${getCategory(expense.categoryId).icon} ${getCategory(expense.categoryId).label}`, expense.isOneOff ? '是' : '否', expense.note ?? '', (expense.amount / 100).toFixed(2)]
+    return [dateText, timeText, getCategory(expense.categoryId).label, expense.isOneOff ? '是' : '否', expense.note ?? '', (expense.amount / 100).toFixed(2)]
   })
   return `\ufeff${[header, ...rows].map((row) => row.map(csvCell).join(',')).join('\n')}`
 }

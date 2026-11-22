@@ -1,13 +1,15 @@
 <script setup lang="ts">
+import UiIcon, { type IconName } from './UiIcon.vue'
+
 type AppView = 'home' | 'stats' | 'settings'
 
 defineProps<{ modelValue: AppView }>()
 const emit = defineEmits<{ 'update:modelValue': [value: AppView] }>()
 
-const items: Array<{ id: AppView; label: string; icon: string }> = [
-  { id: 'home', label: '记录', icon: '📝' },
-  { id: 'stats', label: '统计', icon: '📊' },
-  { id: 'settings', label: '设置', icon: '⚙️' }
+const items: Array<{ id: AppView; label: string; icon: IconName }> = [
+  { id: 'home', label: '记录', icon: 'nav-home' },
+  { id: 'stats', label: '统计', icon: 'nav-stats' },
+  { id: 'settings', label: '设置', icon: 'nav-settings' }
 ]
 </script>
 
@@ -22,8 +24,10 @@ const items: Array<{ id: AppView; label: string; icon: string }> = [
         type="button"
         @click="emit('update:modelValue', item.id)"
       >
-        <span class="nav-icon" aria-hidden="true">{{ item.icon }}</span>
-        <span>{{ item.label }}</span>
+        <span class="nav-icon-wrap" aria-hidden="true">
+          <UiIcon :name="item.icon" :size="19" :stroke-width="modelValue === item.id ? 2.2 : 1.8" />
+        </span>
+        <span class="nav-label">{{ item.label }}</span>
       </button>
     </div>
   </nav>
