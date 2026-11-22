@@ -1,11 +1,34 @@
+import { execSync } from 'child_process'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import { VitePWA } from 'vite-plugin-pwa'
+
+let commitHash = ''
+try {
+  commitHash = execSync('git rev-parse --short HEAD').toString().trim()
+} catch {
+  commitHash = process.env.GITHUB_SHA?.slice(0, 7) || 'dev'
+}
+
+const buildTime = `${new Intl.DateTimeFormat('zh-CN', {
+  timeZone: 'Asia/Shanghai',
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+  hour: '2-digit',
+  minute: '2-digit',
+  hour12: false
+}).format(new Date()).replace(/\//g, '-')} (UTC+8)`
 
 const repositoryName = process.env.GITHUB_REPOSITORY?.split('/')[1]
 
 export default defineConfig({
   base: process.env.GITHUB_ACTIONS && repositoryName ? `/${repositoryName}/` : '/',
+  define: {
+    __APP_VERSION__: JSON.stringify(process.env.npm_package_version || '0.1.0'),
+    __COMMIT_HASH__: JSON.stringify(commitHash),
+    __BUILD_TIME__: JSON.stringify(buildTime)
+  },
   plugins: [
     vue(),
     VitePWA({

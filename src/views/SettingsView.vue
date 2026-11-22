@@ -11,9 +11,11 @@ const settingsStore = useSettingsStore()
 const fileInput = ref<HTMLInputElement>()
 const statusMessage = ref('')
 const isError = ref(false)
-const updateMessage = ref('')
 const isCheckingUpdate = ref(false)
 const periodStartDays = Array.from({ length: 28 }, (_, index) => index + 1)
+const appVersion = __APP_VERSION__
+const commitHash = __COMMIT_HASH__
+const buildTime = __BUILD_TIME__
 
 function download(content: BlobPart, filename: string, type: string): void {
   const url = URL.createObjectURL(new Blob([content], { type }))
@@ -70,20 +72,14 @@ async function checkForUpdates(): Promise<void> {
   if (isCheckingUpdate.value) return
 
   isCheckingUpdate.value = true
-  updateMessage.value = '正在检查更新...'
 
   try {
     await fetchLatestApp()
-    updateMessage.value = '已检查，当前已是最新版本 v0.1'
-  } catch (error) {
-    updateMessage.value = error instanceof Error ? error.message : '检查更新失败，请稍后重试'
+  } catch {
+    // Update status feedback is omitted
   } finally {
     isCheckingUpdate.value = false
   }
-
-  window.setTimeout(() => {
-    if (!isCheckingUpdate.value) updateMessage.value = ''
-  }, 3500)
 }
 
 function changePeriodStartDay(event: Event): void {
@@ -177,14 +173,25 @@ function changePeriodStartDay(event: Event): void {
             <UiIcon name="info" :size="18" :stroke-width="2" />
           </span>
           <div class="setting-copy">
-            <h2 class="setting-title">版本</h2>
-            <p class="setting-description">当前版本 v0.1</p>
+            <h2 class="setting-title version-title">
+              <span>版本</span>
+              <a
+                v-if="commitHash && commitHash !== 'dev'"
+                class="commit-badge"
+                :href="`https://github.com/lemoeJuice/Moneko/commit/${commitHash}`"
+                target="_blank"
+                rel="noopener noreferrer"
+                title="查看本次提交"
+              >
+                {{ commitHash }}
+              </a>
+            </h2>
+            <p class="setting-description">v{{ appVersion }} - {{ buildTime }}</p>
           </div>
-           <button class="secondary-button version-action" type="button" :disabled="isCheckingUpdate" @click="checkForUpdates">
-             {{ isCheckingUpdate ? '检查中...' : '检查更新' }}
-           </button>
+          <button class="secondary-button version-action" type="button" :disabled="isCheckingUpdate" @click="checkForUpdates">
+            {{ isCheckingUpdate ? '检查中...' : '检查更新' }}
+          </button>
         </div>
-        <p v-if="updateMessage" class="status-message">{{ updateMessage }}</p>
       </section>
     </div>
 
@@ -196,4 +203,25 @@ function changePeriodStartDay(event: Event): void {
 .account-note-title { margin: 0; color: var(--ink); font-size: 14px; font-weight: 800; }
 .account-note-text { margin: 4px 0 0; color: var(--muted); font-size: 11px; line-height: 1.5; }
 .version-action { flex: 0 0 auto; }
+.version-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.commit-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 6px;
+  background: var(--blue-soft);
+  color: var(--blue-deep);
+  border-radius: 6px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.4;
+  text-decoration: none;
+}
+.commit-badge:hover {
+  text-decoration: underline;
+}
 </style>
