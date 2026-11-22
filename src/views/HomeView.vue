@@ -5,6 +5,7 @@ import ExpenseList from '../components/ExpenseList.vue'
 import { useExpenseStore } from '../stores/expenseStore'
 import { formatDateHeading, isToday, toDateKey } from '../utils/date'
 import { formatMoney } from '../utils/currency'
+import { forceResetViewport } from '../utils/viewport'
 import type { Expense } from '../types'
 
 defineProps<{ isActive: boolean }>()
@@ -32,7 +33,13 @@ function showToast(): void {
   toastTimer = window.setTimeout(() => { toastVisible.value = false }, 4200)
 }
 
+function closeQuickEntry(): void {
+  forceResetViewport()
+  showQuickEntry.value = false
+}
+
 function handleAdded(): void {
+  forceResetViewport()
   showQuickEntry.value = false
   showToast()
 }
@@ -97,11 +104,11 @@ onBeforeUnmount(() => {
         <span aria-hidden="true">+</span>
       </button>
 
-      <div v-if="showQuickEntry && isActive" class="modal-backdrop" @click.self="showQuickEntry = false">
+      <div v-if="showQuickEntry && isActive" class="modal-backdrop" @click.self="closeQuickEntry">
         <section class="modal entry-modal" role="dialog" aria-modal="true" aria-labelledby="new-entry-title">
           <div class="modal-header">
             <h2 id="new-entry-title" class="modal-title">新记录</h2>
-            <button class="icon-button" type="button" aria-label="关闭" @click="showQuickEntry = false">×</button>
+            <button class="icon-button" type="button" aria-label="关闭" @click="closeQuickEntry">×</button>
           </div>
           <QuickEntry :selected-date="selectedDate" @added="handleAdded" />
         </section>

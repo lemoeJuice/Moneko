@@ -4,6 +4,7 @@ import { categories } from '../constants/categories'
 import { useExpenseStore } from '../stores/expenseStore'
 import { formatDateTimeInput, timestampFromDateTimeInput } from '../utils/date'
 import { parseAmountInput } from '../utils/currency'
+import { forceResetViewport } from '../utils/viewport'
 import type { Expense } from '../types'
 
 const props = defineProps<{ expense: Expense }>()
@@ -16,6 +17,11 @@ const isOneOff = ref(props.expense.isOneOff)
 const note = ref(props.expense.note ?? '')
 const dateTime = ref(formatDateTimeInput(props.expense.timestamp))
 const errorMessage = ref('')
+
+function closeModal(): void {
+  forceResetViewport()
+  emit('close')
+}
 
 async function save(): Promise<void> {
   const cents = parseAmountInput(amount.value)
@@ -31,23 +37,23 @@ async function save(): Promise<void> {
     note: note.value,
     timestamp: timestampFromDateTimeInput(dateTime.value)
   })
-  emit('close')
+  closeModal()
 }
 
 async function remove(): Promise<void> {
   if (!window.confirm('确定删除这笔记录吗？删除后无法撤销。')) return
   await expenseStore.deleteExpense(props.expense.id)
-  emit('close')
+  closeModal()
 }
 </script>
 
 <template>
   <Teleport to="body">
-    <div class="modal-backdrop" @click.self="emit('close')">
+    <div class="modal-backdrop" @click.self="closeModal">
       <section class="modal" role="dialog" aria-modal="true" aria-labelledby="editor-title">
         <div class="modal-header">
           <h2 id="editor-title" class="modal-title">编辑这笔记录</h2>
-          <button class="icon-button" type="button" aria-label="关闭" @click="emit('close')">×</button>
+          <button class="icon-button" type="button" aria-label="关闭" @click="closeModal">×</button>
         </div>
 
         <div class="form-field">
@@ -91,7 +97,7 @@ async function remove(): Promise<void> {
         <div class="modal-actions">
           <button class="danger-button" type="button" @click="remove">删除</button>
           <div class="modal-actions-right">
-            <button class="secondary-button" type="button" @click="emit('close')">取消</button>
+            <button class="secondary-button" type="button" @click="closeModal">取消</button>
             <button class="primary-button" type="button" @click="save">保存修改</button>
           </div>
         </div>

@@ -4,6 +4,7 @@ import { categories } from '../constants/categories'
 import { useExpenseStore } from '../stores/expenseStore'
 import { currencySymbol, parseAmountInput } from '../utils/currency'
 import { timeInputFromTimestamp, timestampFromBusinessDateTimeInput } from '../utils/date'
+import { forceResetViewport } from '../utils/viewport'
 import type { Expense } from '../types'
 
 const props = defineProps<{ selectedDate: string }>()
@@ -46,6 +47,7 @@ async function save(categoryId: Expense['categoryId']): Promise<void> {
   note.value = ''
   isOneOff.value = false
   validationMessage.value = ''
+  forceResetViewport()
   emit('added', expense)
 }
 </script>
