@@ -16,6 +16,7 @@ const viewOrder: AppView[] = ['home', 'stats', 'settings']
 const viewPanels: AppView[] = viewOrder
 const displayIndex = ref(0)
 const trackRef = ref<HTMLElement | null>(null)
+const viewportRef = ref<HTMLElement | null>(null)
 const editingExpense = ref<Expense | null>(null)
 const expenseStore = useExpenseStore()
 
@@ -33,14 +34,18 @@ const activeView = computed<AppView>({
 })
 
 function applyTrackPosition(offset = 0, withTransition = false): void {
-  if (!trackRef.value) return
+  const el = trackRef.value
+  if (!el) return
   const oneThird = 100 / 3
   const basePercent = -displayIndex.value * oneThird
   const width = window.innerWidth > 0 ? window.innerWidth : 360
   const dragPercent = (offset / width) * oneThird
+  el.style.transition = withTransition ? 'transform 0.32s cubic-bezier(0.25, 1, 0.5, 1)' : 'none'
+  el.style.transform = `translate3d(${basePercent + dragPercent}%, 0, 0)`
+}
 
-  trackRef.value.style.transition = withTransition ? 'transform 0.32s cubic-bezier(0.25, 1, 0.5, 1)' : 'none'
-  trackRef.value.style.transform = `translate3d(${basePercent + dragPercent}%, 0, 0)`
+function setViewportTouchAction(action: string): void {
+  if (viewportRef.value) viewportRef.value.style.touchAction = action
 }
 
 function handleVisualViewportResize(): void {
@@ -87,6 +92,8 @@ function handleTouchStart(event: TouchEvent): void {
   currentOffsetX = 0
   axisLock = 'none'
   isDragging = false
+  // Reset to allow both axes until direction is determined
+  setViewportTouchAction('pan-y')
   if (rafId) {
     cancelAnimationFrame(rafId)
     rafId = null
@@ -104,24 +111,26 @@ function handleTouchMove(event: TouchEvent): void {
   if (axisLock === 'none') {
     const absX = Math.abs(deltaX)
     const absY = Math.abs(deltaY)
-    if (absX > 6 || absY > 6) {
+    if (absX > 5 || absY > 5) {
       if (absX >= absY) {
         axisLock = 'horizontal'
         isDragging = true
+        // Tell the browser to handle only horizontal panning — no vertical scroll
+        // This runs entirely on the compositor thread, no preventDefault needed
+        setViewportTouchAction('pan-x')
         if (trackRef.value) {
           trackRef.value.style.transition = 'none'
         }
       } else {
         axisLock = 'vertical'
+        // Let the browser scroll vertically without interference
+        setViewportTouchAction('pan-y')
         return
       }
     }
   }
 
   if (axisLock === 'horizontal') {
-    if (event.cancelable) {
-      event.preventDefault()
-    }
     const isAtFirst = displayIndex.value === 0 && deltaX > 0
     const isAtLast = displayIndex.value === viewOrder.length - 1 && deltaX < 0
     currentOffsetX = (isAtFirst || isAtLast) ? deltaX * 0.28 : deltaX
@@ -167,6 +176,7 @@ function touchReset(): void {
   isDragging = false
   currentOffsetX = 0
   axisLock = 'none'
+  setViewportTouchAction('pan-y')
   applyTrackPosition(0, true)
 }
 </script>
@@ -181,11 +191,12 @@ function touchReset(): void {
 
     <div class="app-content">
       <main
+        ref="viewportRef"
         class="view-viewport"
         @touchstart.passive="handleTouchStart"
-        @touchmove="handleTouchMove"
-        @touchend="handleTouchEnd"
-        @touchcancel="touchReset"
+        @touchmove.passive="handleTouchMove"
+        @touchend.passive="handleTouchEnd"
+        @touchcancel.passive="touchReset"
       >
         <div ref="trackRef" class="view-track">
           <section
