@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { categories, getCategory } from '../constants/categories'
-import UiIcon from '../components/UiIcon.vue'
+import UiIcon, { type IconName } from '../components/UiIcon.vue'
 import { useExpenseStore } from '../stores/expenseStore'
 import { useSettingsStore } from '../stores/settingsStore'
 import { formatMoney } from '../utils/currency'
@@ -268,7 +268,11 @@ function chartTick(ratio: number): string {
         </div>
         <div v-if="selectedDay.segments.length > 0" class="chart-tip-categories">
           <span v-for="segment in selectedDay.segments" :key="segment.categoryId" class="chart-tip-category">
-            {{ getCategory(segment.categoryId).icon }} {{ getCategory(segment.categoryId).label }} <b>{{ formatMoney(segment.amount) }}</b>
+            <span class="tip-category-icon" :style="{ color: getCategory(segment.categoryId).color }">
+              <UiIcon :name="getCategory(segment.categoryId).icon as IconName" :size="13" :stroke-width="2.2" />
+            </span>
+            <span>{{ getCategory(segment.categoryId).label }}</span>
+            <b>{{ formatMoney(segment.amount) }}</b>
           </span>
         </div>
         <span v-else class="chart-tip-category">这一天没有日常支出</span>
@@ -287,7 +291,12 @@ function chartTick(ratio: number): string {
         <div class="summary-row header"><span>分类</span><span class="summary-amount">日均</span><span class="summary-amount">周期累计</span></div>
         <template v-for="stat in categoryStats" :key="stat.category.id">
           <div v-if="stat.total > 0" class="summary-row">
-            <span class="summary-category"><i class="color-dot" :style="{ backgroundColor: stat.category.color }"></i>{{ stat.category.icon }} {{ stat.category.label }}</span>
+            <span class="summary-category">
+              <span class="summary-category-icon" :style="{ color: stat.category.color, backgroundColor: stat.category.softColor }">
+                <UiIcon :name="stat.category.icon as IconName" :size="13" :stroke-width="2.2" />
+              </span>
+              <span>{{ stat.category.label }}</span>
+            </span>
             <span class="summary-amount">{{ formatMoney(Math.round(stat.average)) }}</span>
             <span class="summary-amount">{{ formatMoney(stat.total) }}</span>
           </div>
@@ -306,7 +315,12 @@ function chartTick(ratio: number): string {
       <button v-for="expense in periodOneOffs" :key="expense.id" class="one-off-row" type="button" @click="emit('edit', expense)">
         <span class="one-off-date">{{ formatShortDate(toDateKey(expense.timestamp)) }}</span>
         <span class="one-off-description">
-          <strong>{{ getCategory(expense.categoryId).icon }} {{ getCategory(expense.categoryId).label }}</strong>
+          <strong class="one-off-title">
+            <span class="one-off-icon-wrap" :style="{ color: getCategory(expense.categoryId).color, backgroundColor: getCategory(expense.categoryId).softColor }">
+              <UiIcon :name="getCategory(expense.categoryId).icon as IconName" :size="13" :stroke-width="2.2" />
+            </span>
+            <span>{{ getCategory(expense.categoryId).label }}</span>
+          </strong>
           <span v-if="expense.note">{{ expense.note }}</span>
         </span>
         <span class="one-off-amount">{{ formatMoney(expense.amount) }}</span>
@@ -317,6 +331,26 @@ function chartTick(ratio: number): string {
 </template>
 
 <style scoped>
+.chart-tip-category { display: inline-flex; align-items: center; gap: 4px; }
+.tip-category-icon { display: inline-flex; align-items: center; }
+.summary-category { display: flex; align-items: center; gap: 8px; min-width: 0; font-weight: 700; }
+.summary-category-icon {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 7px;
+  flex-shrink: 0;
+}
 .one-off-row { width: 100%; border: 0; background: transparent; text-align: left; }
 .one-off-row:hover { background: #fffdf7; }
+.one-off-title { display: inline-flex; align-items: center; gap: 6px; }
+.one-off-icon-wrap {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 7px;
+  flex-shrink: 0;
+}
 </style>

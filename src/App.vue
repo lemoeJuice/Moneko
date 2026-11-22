@@ -32,9 +32,10 @@ const activeView = computed<AppView>({
 })
 
 const trackStyle = computed(() => {
-  const basePercent = -displayIndex.value * 33.333333
+  const oneThird = 100 / 3
+  const basePercent = -displayIndex.value * oneThird
   const dragPercent = isDragging.value && typeof window !== 'undefined' && window.innerWidth > 0
-    ? (touchOffsetX.value / window.innerWidth) * 33.333333
+    ? (touchOffsetX.value / window.innerWidth) * oneThird
     : 0
 
   return {
@@ -111,6 +112,9 @@ function handleTouchMove(event: TouchEvent): void {
   }
 
   if (axisLock.value === 'horizontal') {
+    if (event.cancelable) {
+      event.preventDefault()
+    }
     const isAtFirst = displayIndex.value === 0 && deltaX > 0
     const isAtLast = displayIndex.value === viewOrder.length - 1 && deltaX < 0
     touchOffsetX.value = (isAtFirst || isAtLast) ? deltaX * 0.3 : deltaX
@@ -158,12 +162,18 @@ function touchReset(): void {
       <main
         class="view-viewport"
         @touchstart.passive="handleTouchStart"
-        @touchmove.passive="handleTouchMove"
+        @touchmove="handleTouchMove"
         @touchend="handleTouchEnd"
         @touchcancel="touchReset"
       >
         <div class="view-track" :style="trackStyle">
-          <section v-for="(view, index) in viewPanels" :key="`${view}-${index}`" :ref="(element) => setPanelRef(element, index)" class="view-panel">
+          <section
+            v-for="(view, index) in viewPanels"
+            :key="`${view}-${index}`"
+            :ref="(element) => setPanelRef(element, index)"
+            class="view-panel"
+            :class="{ 'scroll-locked': isDragging && axisLock === 'horizontal' }"
+          >
             <HomeView v-if="view === 'home'" :is-active="activeView === 'home'" @edit="openEditor" />
             <StatsView v-else-if="view === 'stats'" @edit="openEditor" />
             <SettingsView v-else />
