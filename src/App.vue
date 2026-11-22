@@ -15,34 +15,33 @@ type AxisLock = 'none' | 'horizontal' | 'vertical'
 const viewOrder: AppView[] = ['home', 'stats', 'settings']
 const viewPanels: AppView[] = viewOrder
 const displayIndex = ref(0)
-const touchOffsetX = ref(0)
-const isDragging = ref(false)
-const axisLock = ref<AxisLock>('none')
-const panelRefs = ref<Array<HTMLElement | null>>([])
+const trackRef = ref<HTMLElement | null>(null)
 const editingExpense = ref<Expense | null>(null)
 const expenseStore = useExpenseStore()
 
 let startX = 0
 let startY = 0
 let startTime = 0
+let currentOffsetX = 0
+let isDragging = false
+let axisLock: AxisLock = 'none'
+let rafId: number | null = null
 
 const activeView = computed<AppView>({
   get: () => viewOrder[displayIndex.value],
   set: (view) => goToView(view)
 })
 
-const trackStyle = computed(() => {
+function applyTrackPosition(offset = 0, withTransition = false): void {
+  if (!trackRef.value) return
   const oneThird = 100 / 3
   const basePercent = -displayIndex.value * oneThird
-  const dragPercent = isDragging.value && typeof window !== 'undefined' && window.innerWidth > 0
-    ? (touchOffsetX.value / window.innerWidth) * oneThird
-    : 0
+  const width = window.innerWidth > 0 ? window.innerWidth : 360
+  const dragPercent = (offset / width) * oneThird
 
-  return {
-    transform: `translate3d(${basePercent + dragPercent}%, 0, 0)`,
-    transition: isDragging.value ? 'none' : 'transform 0.32s cubic-bezier(0.25, 1, 0.5, 1)'
-  }
-})
+  trackRef.value.style.transition = withTransition ? 'transform 0.32s cubic-bezier(0.25, 1, 0.5, 1)' : 'none'
+  trackRef.value.style.transform = `translate3d(${basePercent + dragPercent}%, 0, 0)`
+}
 
 function handleVisualViewportResize(): void {
   if (window.visualViewport && window.visualViewport.height >= window.innerHeight * 0.9) {
@@ -52,6 +51,7 @@ function handleVisualViewportResize(): void {
 
 onMounted(() => {
   expenseStore.load()
+  applyTrackPosition(0, false)
   if (typeof window !== 'undefined' && window.visualViewport) {
     window.visualViewport.addEventListener('resize', handleVisualViewportResize)
   }
@@ -61,15 +61,11 @@ onBeforeUnmount(() => {
   if (typeof window !== 'undefined' && window.visualViewport) {
     window.visualViewport.removeEventListener('resize', handleVisualViewportResize)
   }
-  touchReset()
+  if (rafId) cancelAnimationFrame(rafId)
 })
 
 function openEditor(expense: Expense): void {
   editingExpense.value = expense
-}
-
-function setPanelRef(element: unknown, index: number): void {
-  panelRefs.value[index] = element instanceof HTMLElement ? element : null
 }
 
 function goToView(view: AppView): void {
@@ -77,62 +73,86 @@ function goToView(view: AppView): void {
   const targetIndex = viewOrder.indexOf(view)
   if (targetIndex === -1) return
   displayIndex.value = targetIndex
+  applyTrackPosition(0, true)
 }
 
 function handleTouchStart(event: TouchEvent): void {
   if (event.touches.length !== 1) return
   const touch = event.touches[0]
   if (!touch) return
+
   startX = touch.clientX
   startY = touch.clientY
   startTime = Date.now()
-  touchOffsetX.value = 0
-  axisLock.value = 'none'
-  isDragging.value = false
+  currentOffsetX = 0
+  axisLock = 'none'
+  isDragging = false
+  if (rafId) {
+    cancelAnimationFrame(rafId)
+    rafId = null
+  }
 }
 
 function handleTouchMove(event: TouchEvent): void {
-  if (axisLock.value === 'vertical' || event.touches.length !== 1) return
+  if (axisLock === 'vertical' || event.touches.length !== 1) return
   const touch = event.touches[0]
   if (!touch) return
 
   const deltaX = touch.clientX - startX
   const deltaY = touch.clientY - startY
 
-  if (axisLock.value === 'none') {
-    if (Math.abs(deltaX) > 8 || Math.abs(deltaY) > 8) {
-      if (Math.abs(deltaX) > Math.abs(deltaY) * 1.2) {
-        axisLock.value = 'horizontal'
-        isDragging.value = true
+  if (axisLock === 'none') {
+    const absX = Math.abs(deltaX)
+    const absY = Math.abs(deltaY)
+    if (absX > 6 || absY > 6) {
+      if (absX >= absY) {
+        axisLock = 'horizontal'
+        isDragging = true
+        if (trackRef.value) {
+          trackRef.value.style.transition = 'none'
+        }
       } else {
-        axisLock.value = 'vertical'
+        axisLock = 'vertical'
         return
       }
     }
   }
 
-  if (axisLock.value === 'horizontal') {
+  if (axisLock === 'horizontal') {
     if (event.cancelable) {
       event.preventDefault()
     }
     const isAtFirst = displayIndex.value === 0 && deltaX > 0
     const isAtLast = displayIndex.value === viewOrder.length - 1 && deltaX < 0
-    touchOffsetX.value = (isAtFirst || isAtLast) ? deltaX * 0.3 : deltaX
+    currentOffsetX = (isAtFirst || isAtLast) ? deltaX * 0.28 : deltaX
+
+    if (!rafId) {
+      rafId = requestAnimationFrame(() => {
+        applyTrackPosition(currentOffsetX, false)
+        rafId = null
+      })
+    }
   }
 }
 
 function handleTouchEnd(): void {
-  if (!isDragging.value || axisLock.value !== 'horizontal') {
+  if (rafId) {
+    cancelAnimationFrame(rafId)
+    rafId = null
+  }
+
+  if (!isDragging || axisLock !== 'horizontal') {
     touchReset()
     return
   }
 
-  const deltaX = touchOffsetX.value
+  const deltaX = currentOffsetX
   const duration = Math.max(1, Date.now() - startTime)
   const velocity = Math.abs(deltaX) / duration
-  const threshold = (typeof window !== 'undefined' ? window.innerWidth : 360) * 0.22
+  const width = typeof window !== 'undefined' ? window.innerWidth : 360
+  const threshold = width * 0.2
 
-  if (Math.abs(deltaX) > threshold || velocity > 0.28) {
+  if (Math.abs(deltaX) > threshold || velocity > 0.25) {
     if (deltaX < 0 && displayIndex.value < viewOrder.length - 1) {
       displayIndex.value += 1
     } else if (deltaX > 0 && displayIndex.value > 0) {
@@ -144,9 +164,10 @@ function handleTouchEnd(): void {
 }
 
 function touchReset(): void {
-  isDragging.value = false
-  touchOffsetX.value = 0
-  axisLock.value = 'none'
+  isDragging = false
+  currentOffsetX = 0
+  axisLock = 'none'
+  applyTrackPosition(0, true)
 }
 </script>
 
@@ -166,13 +187,11 @@ function touchReset(): void {
         @touchend="handleTouchEnd"
         @touchcancel="touchReset"
       >
-        <div class="view-track" :style="trackStyle">
+        <div ref="trackRef" class="view-track">
           <section
             v-for="(view, index) in viewPanels"
             :key="`${view}-${index}`"
-            :ref="(element) => setPanelRef(element, index)"
             class="view-panel"
-            :class="{ 'scroll-locked': isDragging && axisLock === 'horizontal' }"
           >
             <HomeView v-if="view === 'home'" :is-active="activeView === 'home'" @edit="openEditor" />
             <StatsView v-else-if="view === 'stats'" @edit="openEditor" />

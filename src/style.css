@@ -125,6 +125,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
   height: 100%;
   align-items: stretch;
   will-change: transform;
+  transform: translateZ(0);
   background: #f7fbff;
 }
 .view-panel {
@@ -138,16 +139,12 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
   scrollbar-width: none;
   -ms-overflow-style: none;
   background: #f7fbff;
+  contain: content;
 }
 .view-panel::-webkit-scrollbar {
   display: none;
   width: 0;
   height: 0;
-}
-.view-panel.scroll-locked {
-  overflow-y: hidden !important;
-  touch-action: pan-x !important;
-  pointer-events: none;
 }
 .view-panel > * { width: min(calc(100% - 32px), 760px); margin: 0 auto; }
 
@@ -159,10 +156,8 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
 .card {
   border: 1px solid rgba(220, 233, 242, 0.85);
   border-radius: 20px;
-  background: rgba(255, 255, 255, 0.88);
-  box-shadow: 0 6px 24px rgba(45, 85, 115, 0.05), 0 1px 3px rgba(45, 85, 115, 0.02);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: #ffffff;
+  box-shadow: 0 4px 18px rgba(45, 85, 115, 0.04), 0 1px 3px rgba(45, 85, 115, 0.02);
 }
 
 .date-nav {
