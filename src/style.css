@@ -38,7 +38,9 @@ html, body {
 
 body {
   min-width: 320px;
-  background: #f7fbff;
+  background:
+    radial-gradient(circle at 10% 0%, rgba(220, 241, 255, 0.85), transparent 32rem),
+    #f7fbff;
 }
 
 button, input, textarea { font: inherit; }
@@ -117,7 +119,6 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
   min-height: 0;
   overflow: hidden;
   touch-action: pan-y;
-  background: #f7fbff;
 }
 .view-track {
   display: flex;
@@ -125,11 +126,9 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
   height: 100%;
   align-items: stretch;
   will-change: transform;
-  transform: translateZ(0);
-  background: #f7fbff;
 }
 .view-panel {
-  flex: 0 0 33.333333%;
+  flex: 0 0 calc(100% / 3);
   min-width: 0;
   height: 100%;
   padding-bottom: 24px;
@@ -138,8 +137,6 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  background: #f7fbff;
-  contain: content;
 }
 .view-panel::-webkit-scrollbar {
   display: none;
@@ -156,8 +153,8 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
 .card {
   border: 1px solid rgba(220, 233, 242, 0.85);
   border-radius: 20px;
-  background: #ffffff;
-  box-shadow: 0 4px 18px rgba(45, 85, 115, 0.04), 0 1px 3px rgba(45, 85, 115, 0.02);
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow: 0 8px 26px rgba(45, 85, 115, 0.05);
 }
 
 .date-nav {
